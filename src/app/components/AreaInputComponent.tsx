@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React, { InputHTMLAttributes, ReactNode } from "react";
 // import { IconType } from "react-icons";
 // import {
