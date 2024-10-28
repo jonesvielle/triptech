@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-const ParallaxComponent = ({ backgroundImage }) => {
+const ParallaxComponent = ({ backgroundImage }: { backgroundImage: any }) => {
   useEffect(() => {
     const parallaxEffect = () => {
       const scrollPosition = window.pageYOffset;
