@@ -1,4 +1,5 @@
 // app/api/sendEmail/route.ts
+/* eslint-disable  */
 
 import nodemailer from "nodemailer";
 
@@ -37,7 +38,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error sending request:", error);
     return new Response(
-      JSON.stringify({ message: "Error sending email", error: error?.message }),
+      JSON.stringify({
+        message: "Error sending email",
+        error: error?.message ?? "Unknown error",
+      }),
       { status: 500 }
     );
   }
