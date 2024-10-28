@@ -1,10 +1,10 @@
 import React, { HTMLInputTypeAttribute, ReactNode } from "react";
-import { IconType } from "react-icons";
-import {
-  IoCalendar,
-  IoCalendarClearOutline,
-  IoCalendarOutline,
-} from "react-icons/io5";
+// import { IconType } from "react-icons";
+// import {
+//   IoCalendar,
+//   IoCalendarClearOutline,
+//   IoCalendarOutline,
+// } from "react-icons/io5";
 
 interface DateInputComponentProps {
   label: string;
@@ -19,11 +19,8 @@ interface DateInputComponentProps {
 }
 const DateInputComponent = ({
   label,
-  type,
   placeholder,
   inputColor,
-  Icon,
-  value,
 }: DateInputComponentProps) => {
   return (
     <>

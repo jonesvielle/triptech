@@ -1,5 +1,5 @@
 "use client";
-import { FormEvent, LegacyRef, use, useEffect, useRef, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import "react-toastify/dist/ReactToastify.css"; // Import styles
 import "../../styles/global.css";
 import { ToastContainer, toast } from "react-toastify";
@@ -12,36 +12,26 @@ import Image from "next/image";
 import {
   IoCalendar,
   IoCall,
-  IoCallOutline,
   IoCallSharp,
   IoCashSharp,
-  IoCheckmark,
   IoGridSharp,
-  IoHeadsetSharp,
   IoLocation,
   IoLockClosedSharp,
   IoLogoFacebook,
   IoLogoInstagram,
   IoLogoLinkedin,
-  IoLogoTwitter,
   IoLogoWhatsapp,
-  IoMail,
   IoMailOpen,
-  IoPin,
   IoSnowSharp,
 } from "react-icons/io5";
 import CheckList from "./components/CheckList";
 import { servicesList } from "./helpers/lists";
 import InputComponent from "./components/InputComponent";
 import AreaInputComponent from "./components/AreaInputComponent";
-import ParallaxComponent from "./components/ParallaxComponent";
 import SelectInputComponent from "./components/SelectInputComponent";
-import DateInputComponent from "./components/DateInputComponent";
-import TypingAnimation from "./components/TypingAnimation";
 import SlideUpComponent from "./components/SlideUpComponent";
 import BounceInComponent from "./components/BounceInComponent";
 import CountUp from "./components/CountUpAnimation";
-import { SMTPClient } from "emailjs";
 import {
   BookAppointmentRequestPayloadType,
   QuotationRequestPayloadType,

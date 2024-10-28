@@ -3,12 +3,12 @@ import React, {
   InputHTMLAttributes,
   ReactNode,
 } from "react";
-import { IconType } from "react-icons";
-import {
-  IoCalendar,
-  IoCalendarClearOutline,
-  IoCalendarOutline,
-} from "react-icons/io5";
+// import { IconType } from "react-icons";
+// import {
+//   IoCalendar,
+//   IoCalendarClearOutline,
+//   IoCalendarOutline,
+// } from "react-icons/io5";
 
 interface AreaInputComponentProps
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -24,7 +24,7 @@ interface AreaInputComponentProps
 }
 const AreaInputComponent = ({
   label,
-  type,
+  type = "text",
   placeholder,
   inputColor,
   Icon,

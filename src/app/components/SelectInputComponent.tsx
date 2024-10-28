@@ -24,7 +24,6 @@ interface SelectInputComponentProps
 const SelectInputComponent = ({
   required = false,
   label,
-  type,
   placeholder,
   inputColor,
   Icon,

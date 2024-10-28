@@ -1,5 +1,5 @@
 import React from "react";
-import { IoCheckmark, IoCheckmarkSharp } from "react-icons/io5";
+import { IoCheckmarkSharp } from "react-icons/io5";
 import { robotoFontBodyLight } from "../helpers/fonts";
 import SlideUpComponent from "./SlideUpComponent";
 
@@ -20,8 +20,8 @@ const CheckList = ({
     <div style={containerStyle}>
       {data.length > 0 &&
         data.map((c, i) => (
-          <SlideUpComponent>
-            <div style={itemContainerStyle} key={i} className="flex flex-row">
+          <SlideUpComponent key={i}>
+            <div style={itemContainerStyle} className="flex flex-row">
               <IoCheckmarkSharp
                 style={{ fontWeight: "bold" }}
                 size={30}

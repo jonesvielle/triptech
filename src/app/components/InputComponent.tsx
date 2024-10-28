@@ -3,12 +3,12 @@ import React, {
   InputHTMLAttributes,
   ReactNode,
 } from "react";
-import { IconType } from "react-icons";
-import {
-  IoCalendar,
-  IoCalendarClearOutline,
-  IoCalendarOutline,
-} from "react-icons/io5";
+// import { IconType } from "react-icons";
+// import {
+//   IoCalendar,
+//   IoCalendarClearOutline,
+//   IoCalendarOutline,
+// } from "react-icons/io5";
 
 interface InputComponentProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -24,9 +24,7 @@ interface InputComponentProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 const InputComponent = ({
   label,
-  type,
   placeholder,
-  inputColor,
   Icon,
   required = false,
   name = "",
