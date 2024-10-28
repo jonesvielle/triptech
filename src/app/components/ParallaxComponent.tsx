@@ -4,7 +4,7 @@ const ParallaxComponent = ({ backgroundImage }: { backgroundImage: any }) => {
   useEffect(() => {
     const parallaxEffect = () => {
       const scrollPosition = window.pageYOffset;
-      const parallaxElement = document.querySelector(".parallax-bg");
+      const parallaxElement: any = document.querySelector(".parallax-bg");
 
       if (parallaxElement) {
         parallaxElement.style.transform = `translateY(${
