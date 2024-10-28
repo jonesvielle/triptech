@@ -21,6 +21,7 @@ const DateInputComponent = ({
   label,
   placeholder,
   inputColor,
+  Icon,
 }: DateInputComponentProps) => {
   return (
     <>
