@@ -1,0 +1,26 @@
+.typing-animation {
+  font-family: "Courier", monospace;
+  font-size: 2rem;
+  color: white;
+  display: inline;
+}
+
+.blinking-cursor {
+  display: inline-block;
+  margin-left: 5px;
+  width: 1px;
+  background-color: white;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
