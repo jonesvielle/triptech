@@ -1,8 +1,4 @@
-import React, {
-  HTMLInputTypeAttribute,
-  InputHTMLAttributes,
-  ReactNode,
-} from "react";
+import React, { InputHTMLAttributes, ReactNode } from "react";
 // import { IconType } from "react-icons";
 // import {
 //   IoCalendar,
@@ -13,14 +9,10 @@ import React, {
 interface AreaInputComponentProps
   extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  type?: HTMLInputTypeAttribute | undefined;
   placeholder: string;
   inputColor?: string;
   Icon?: ReactNode;
   required?: boolean;
-}
-{
-  /* <IoCalendar className="mr-2 text-[30px] text-primary-gray" />; */
 }
 const AreaInputComponent = ({
   label,
