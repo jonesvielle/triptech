@@ -40,8 +40,8 @@ import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 export default function Home() {
-  const quotationSectionRef = useRef(null);
-  const serviceSectionRef = useRef(null);
+  const quotationSectionRef = useRef<HTMLDivElement>(null);
+  const serviceSectionRef = useRef<HTMLDivElement>(null);
 
   const [mailLoading, setMailLoading] = useState(false);
 
