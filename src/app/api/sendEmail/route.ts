@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       JSON.stringify({ message: "Request sent successfully" }),
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error sending request:", error);
     return new Response(
       JSON.stringify({
