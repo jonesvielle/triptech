@@ -38,7 +38,7 @@ const InputComponent = ({
         <input
           required={required}
           className=" outline-none rounded-lg  w-full md:w-full text-primary-dark mt-1"
-          type={type}
+          // type={type}
           placeholder={placeholder}
           name={name}
           {...rest}

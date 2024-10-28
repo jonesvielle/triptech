@@ -225,7 +225,7 @@ export default function Home() {
     // console.log("formData: " + JSON.stringify(formData))
     let payload = {};
     // Optional: Log form data for debugging
-    for (let [key, value] of formData?.entries()) {
+    for (const [key, value] of formData?.entries()) {
       // console.log("loger", key, value);
       payload = { ...payload, [key]: value };
     }
@@ -246,7 +246,7 @@ export default function Home() {
     // console.log("formData: " + JSON.stringify(formData))
     let payload = {};
     // Optional: Log form data for debugging
-    for (let [key, value] of formData?.entries()) {
+    for (const [key, value] of formData?.entries()) {
       // console.log("loger", key, value);
       payload = { ...payload, [key]: value };
     }
@@ -397,8 +397,8 @@ export default function Home() {
                 <div
                   className={`${robotoFontBody.className} md:text-[23px] text-[18px] mt-5`}
                 >
-                  Since 2021, we have been Africa's trusted partner for solar
-                  energy, cctv installation and 3d modelling and printing,
+                  Since 2021, we have been Africa&apos;s trusted partner for
+                  solar energy, cctv installation and 3d modelling and printing,
                   design consultation. We currently have over 45 staff stationed
                   strategically across the nation.
                 </div>
@@ -889,7 +889,7 @@ export default function Home() {
             <div
               className={`${robotoFont.className} text-white md:text-[40px] text-[20px] font-[700px] md:w-1/2 text-center mt-10 md:mt-20`}
             >
-              Benefits of choosing tri-p tech's Solutions
+              Benefits of choosing tri-p tech&apos;s Solutions
             </div>
             <div className="flex md:flex-row flex-col md:justify-between items-center md:items-start md:mt-16 mt-8">
               <div className="md:w-1/5 md:block flex flex-col items-center">

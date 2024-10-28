@@ -24,7 +24,6 @@ interface AreaInputComponentProps
 }
 const AreaInputComponent = ({
   label,
-  type = "text",
   placeholder,
   inputColor,
   Icon,
