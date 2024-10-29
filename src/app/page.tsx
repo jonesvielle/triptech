@@ -272,7 +272,7 @@ export default function Home() {
             progressStyle={{ backgroundColor: "#117865" }}
           />
           {/* hero */}
-          <div className="hero  flex flex-col w-full pb-16">
+          <div className="hero flex flex-col w-full pb-16">
             {/* <div className="hero-background-overlay" /> */}
             <video autoPlay loop muted playsInline className="background-video">
               {/* <div className="hero-background-overlay" /> */}
@@ -382,33 +382,33 @@ export default function Home() {
             </div> */}
           </div>
           {/* about */}
-          <div className="bg-white md:px-20 py-16 flex flex-col items-center">
+          <div className="bg-white md:px-20  py-16 flex flex-col items-center">
             <div className="text-primary-green border-2 rounded-xxl py-2 px-4">
               TRIP INNOVATIVE TECH
             </div>
             <div
-              className={`${robotoFont.className} font-bold md:text-start text-center text-primary-dark mt-5 mb-10 md:text-[40px] text-[20px]`}
+              className={`${robotoFont.className} md:px-0 px-8 font-bold md:text-start text-center text-primary-dark mt-5 mb-10 md:text-[40px] text-[20px]`}
             >
               Powering & Securing Nigeria Since 2021
             </div>
             <div className="flex flex-row  justify-center">
               <div className={`md:w-2/5 w-4/5 text-black`}>
                 <p
-                  className={`${robotoFontBody.className} md:text-[23px] text-[18px]`}
+                  className={`${robotoFontBody.className} md:text-[23px] text-[15px] md:text-start text-center`}
                 >
                   TRI-P Innovative Solutions is an indigenous Solar energy,
                   security systems and product modelling company based in
                   Nigeria.
                 </p>
                 <div
-                  className={`${robotoFontBody.className} md:text-[23px] text-[18px] mt-5`}
+                  className={`${robotoFontBody.className} md:text-[23px] text-[15px] mt-5 md:text-start text-center`}
                 >
                   Since 2021, we have been Africa&apos;s trusted partner for
                   solar energy, cctv installation and 3d modelling and printing,
                   design consultation. We currently have over 45 staff stationed
                   strategically across the nation.
                 </div>
-                <div>
+                <div className="md:mt-0 mt-5">
                   <CheckList
                     data={servicesList}
                     itemContainerStyle={{ marginTop: "2%" }}
