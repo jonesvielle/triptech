@@ -294,6 +294,8 @@ export default function Home() {
                     interval={5000} // Adjust timing as needed
                     stopOnHover
                     emulateTouch
+                    preventMovementUntilSwipeScrollTolerance={true}
+                    swipeScrollTolerance={50}
                     className="text-center"
                   >
                     {/* Slide 1 */}
