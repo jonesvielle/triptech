@@ -43,10 +43,6 @@ import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 // Define an interface for the form data
-interface FormDataEntry {
-  [key: string]: string | File;
-}
-
 export default function Home() {
   const quotationSectionRef = useRef<HTMLDivElement>(null);
   const serviceSectionRef = useRef<HTMLDivElement>(null);
