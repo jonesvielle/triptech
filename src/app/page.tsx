@@ -658,7 +658,7 @@ export default function Home() {
                   </SlideUpComponent>
                 </div>
               </div>
-              <div className="md:w-2/3 w-5/6 p-10 bg-white rounded-xl md:mt-0 mt-10">
+              <div className="md:w-2/3 w-5/6 md:p-10 p-5 bg-white rounded-xl md:mt-0 mt-10">
                 <form onSubmit={handleSubmitBook}>
                   <div className="flex md:flex-row flex-col w-full justify-between items-center">
                     <div className="flex flex-col w-full">
@@ -1114,7 +1114,7 @@ export default function Home() {
               </div>
               <form
                 onSubmit={handleSubmitQuote}
-                className="flex w-full md:flex-row flex-col p-10 md:mt-10 mt-5 justify-center bg-white rounded-xl"
+                className="flex w-full md:flex-row flex-col md:p-10 p-5  md:mt-10 mt-5 justify-center bg-white rounded-xl"
               >
                 <div className="md:w-2/5 md:mr-10">
                   <div
