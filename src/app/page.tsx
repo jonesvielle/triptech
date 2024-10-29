@@ -299,14 +299,14 @@ export default function Home() {
                     className="text-center"
                   >
                     {/* Slide 1 */}
-                    <div className="md:mb-20 mb-32">
+                    <div className="md:mb-20 mb-20">
                       <div
                         className={`${robotoFont.className} text-[30px] md:text-[60px] font-bold`}
                       >
                         Empowering a sustainable future for Africa with
                         alternative power solutions
                       </div>
-                      <div className="mt-10 text-[20px] font-euclidLight text-center">
+                      <div className="mt-10 md:text-[20px] text-[15px] font-euclidLight text-center">
                         <SlideUpComponent>
                           Explore our custom solar system, CCTV, and 3D printing
                           services, as well as consultancy and product design
@@ -316,14 +316,14 @@ export default function Home() {
                     </div>
 
                     {/* Slide 2 */}
-                    <div className="md:mb-20 mb-32">
+                    <div className="md:mb-20 mb-20">
                       <div
                         className={`${robotoFont.className} text-[30px] md:text-[60px] font-bold`}
                       >
                         Empowering a sustainable future for Africa with
                         alternative power solutions
                       </div>
-                      <div className="mt-10 text-[20px] font-euclidLight text-center">
+                      <div className="mt-10 md:text-[20px] text-[15px] font-euclidLight text-center">
                         <SlideUpComponent>
                           Explore our custom solar system, CCTV and 3d printing
                           services As well as other consultancy and product
@@ -339,7 +339,7 @@ export default function Home() {
                       >
                         Secure Your World with Our Advanced CCTV Solutions
                       </div>
-                      <div className="mt-10 text-[20px] font-euclidLight text-center">
+                      <div className="mt-10 md:text-[20px] text-[15px] font-euclidLight text-center">
                         <SlideUpComponent>
                           Safeguard what matters most with Tri-P Tech’s custom
                           CCTV solutions, offering peace of mind for home or
