@@ -320,14 +320,13 @@ export default function Home() {
                       <div
                         className={`${robotoFont.className} text-[30px] md:text-[60px] font-bold`}
                       >
-                        Empowering a sustainable future for Africa with
-                        alternative power solutions
+                        Transform Ideas into Reality with Precision 3D Printing
                       </div>
                       <div className="mt-10 md:text-[20px] text-[15px] font-euclidLight text-center">
                         <SlideUpComponent>
-                          Explore our custom solar system, CCTV and 3d printing
-                          services As well as other consultancy and product
-                          design related expetise recommendations
+                          Bring your ideas to life with Tri-P Tech’s
+                          high-quality 3D printing, delivering exceptional
+                          detail and accuracy to realize your vision.
                         </SlideUpComponent>
                       </div>
                     </div>
