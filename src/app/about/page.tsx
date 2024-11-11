@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "react-toastify/dist/ReactToastify.css"; // Import styles
 import "../../../styles/global.css";
-import { Slide, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import {
   robotoFont,
   robotoFontBody,
@@ -12,7 +12,6 @@ import Image from "next/image";
 import {
   IoArrowForward,
   IoEarthSharp,
-  IoGlobe,
   IoGlobeSharp,
   IoLogoFacebook,
   IoLogoInstagram,
@@ -25,9 +24,9 @@ import BounceInComponent from "../components/BounceInComponent";
 import SlideUpComponent from "../components/SlideUpComponent";
 import CountUp from "../components/CountUpAnimation";
 
-interface AboutPageProps {}
+// interface AboutPageProps {}
 
-const AboutPage = (props: AboutPageProps) => {
+const AboutPage = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
 
   const handleCarouselNext = () => {
@@ -62,7 +61,7 @@ const AboutPage = (props: AboutPageProps) => {
             <SlideUpComponent>
               Empowering Africa: Reliable Power, Enhanced Security, Thoughtful
               Design for Every Home. Transforming lives with cutting-edge
-              solutions tailored to your community's needs.
+              solutions tailored to your community&apos;s needs.
             </SlideUpComponent>
           </div>
           <div className="text-white-500 flex md:flex-row flex-col md:mt-16 mt-16 flex flex-row justify-center">
@@ -563,8 +562,8 @@ const AboutPage = (props: AboutPageProps) => {
                     <p
                       className={`${robotoFontBody.className} md:text-[15px] text-[10px] md:text-start text-center text-secondary-gray`}
                     >
-                      We prioritize our customers' needs and satisfaction,
-                      ensuring personalized service and support at every step."
+                      We prioritize our customers&apos; needs and satisfaction,
+                      ensuring personalized service and support at every step.
                     </p>
                   </div>
                 </div>
@@ -591,7 +590,7 @@ const AboutPage = (props: AboutPageProps) => {
                     >
                       We use high-quality materials and adhere to strict
                       standards to ensure the durability of our installations
-                      and products."
+                      and products.
                     </p>
                   </div>
                 </div>
@@ -615,7 +614,7 @@ const AboutPage = (props: AboutPageProps) => {
                     <p
                       className={`${robotoFontBody.className} md:text-[15px] text-[10px] md:text-start text-center text-secondary-gray`}
                     >
-                      We prioritize our customers' needs and satisfaction,
+                      We prioritize our customers&apos; needs and satisfaction,
                       ensuring personalized service and support at every step
                     </p>
                   </div>
@@ -639,8 +638,8 @@ const AboutPage = (props: AboutPageProps) => {
             className={`text-center mt-0 text-[15px] md:text-[20px] ${robotoFontBodyLight.className} md:w-1/2 px-5 md:px-0 text-secondary-gray`}
           >
             <SlideUpComponent>
-              We've so far worked with over 700 satisfied clients and are still
-              growing with 45 employees nationwide.
+              We&apos;ve so far worked with over 700 satisfied clients and are
+              still growing with 45 employees nationwide.
             </SlideUpComponent>
           </div>
           {/* alternative power solutions */}
@@ -661,10 +660,10 @@ const AboutPage = (props: AboutPageProps) => {
                 className={` mt-0 md:text-[18px] text-[12px] md:text-start text-center ${robotoFontBody.className} text-secondary-gray md:w-2/3 px-5 md:px-0`}
               >
                 <SlideUpComponent>
-                  Harness the power of the sun with TRI-P TECH's cutting-edge
-                  power solutions. Our solar panels maximize energy production,
-                  providing a sustainable and cost-effective alternative to
-                  traditional power sources.
+                  Harness the power of the sun with TRI-P TECH&apos;s
+                  cutting-edge power solutions. Our solar panels maximize energy
+                  production, providing a sustainable and cost-effective
+                  alternative to traditional power sources.
                 </SlideUpComponent>
               </div>
               <div className="flex mt-5 md:justify-start justify-center">
@@ -740,7 +739,7 @@ const AboutPage = (props: AboutPageProps) => {
                 className={` mt-0 text-[12px] text-center md:text-start md:text-[18px] ${robotoFontBody.className} text-secondary-gray md:w-2/3 w-full md:px-0 px-5`}
               >
                 <SlideUpComponent>
-                  Bring your ideas to life with TRI-P TECH's 3D printing
+                  Bring your ideas to life with TRI-P TECH&apos;s 3D printing
                   services. We offer a range of custom printing solutions
                   tailored to your specific needs, whether for personal,
                   commercial, or industrial projects.
@@ -789,7 +788,7 @@ const AboutPage = (props: AboutPageProps) => {
               >
                 <SlideUpComponent>
                   Ensure the safety and security of your property with TRI-P
-                  TECH's CCTV installation services. We offer a range of
+                  TECH&apos;s CCTV installation services. We offer a range of
                   surveillance solutions tailored to meet your specific needs,
                   whether for residential, commercial, or industrial use.
                 </SlideUpComponent>
@@ -803,7 +802,7 @@ const AboutPage = (props: AboutPageProps) => {
                   className={` mt-0 text-[12px] md:text-[18px] ${robotoFontBody.className} text-secondary-gray w-1/2`}
                 >
                   <b className="font-black text-black">
-                    CCTV Camera's Installed
+                    CCTV Camera&apos;s Installed
                   </b>{" "}
                   in over 120 homes and offices across Nigeria.
                 </div>
