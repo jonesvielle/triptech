@@ -1,36 +1,44 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { IoChevronDown, IoMenu, IoClose } from "react-icons/io5";
 
-interface TopNavProps {}
+interface TopNavProps {
+  currentPath: string;
+}
 
-const TopNav = ({}: TopNavProps) => {
+const TopNav = ({ currentPath }: TopNavProps) => {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [solutionIsClicked, setSolutionIsClicked] = useState<boolean>();
+  const [solutionIsClicked, setSolutionIsClicked] = useState(false);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    if (isMenuOpen) setSolutionIsClicked(false); // Close dropdown when menu closes
+  };
+
+  const handleRouteToHome = () => {
+    router.push("/");
+  };
 
   return (
     <div
-      onMouseLeave={() => setSolutionIsClicked(false)}
-      className={`absolute w-full py-4 px-5 md:px-10 ${
+      onMouseLeave={() => !isMenuOpen && setSolutionIsClicked(false)}
+      className={`absolute w-full py-4 px-5 md:px-10 z-10 ${
         solutionIsClicked
           ? "bg-white text-black transition-all duration-300 ease-in-out"
           : "bg-transparent"
       }`}
     >
-      <div
-        onClick={() => {
-          setSolutionIsClicked(false);
-        }}
-        className="flex justify-between items-center"
-      >
+      <div className="flex justify-between items-center">
         {/* Logo */}
         <Image
+          onClick={handleRouteToHome}
           style={{ zIndex: 2 }}
-          height={50} // Adjusted for mobile
-          width={150} // Adjusted for mobile
+          height={50}
+          width={150}
           alt="Logo"
           src={
             solutionIsClicked
@@ -45,14 +53,7 @@ const TopNav = ({}: TopNavProps) => {
           className={`block md:hidden ${
             solutionIsClicked ? "text-primary-dark" : "text-white"
           } z-50`}
-          onClick={() => {
-            toggleMenu();
-            if (solutionIsClicked) {
-              setSolutionIsClicked(false);
-            } else {
-              setSolutionIsClicked(true);
-            }
-          }}
+          onClick={toggleMenu}
         >
           {isMenuOpen ? <IoClose size={30} /> : <IoMenu size={30} />}
         </button>
@@ -61,17 +62,27 @@ const TopNav = ({}: TopNavProps) => {
         <div
           className={`hidden md:flex flex-row space-x-6 ${
             solutionIsClicked ? "text-primary-dark" : "text-white"
-          } z-10 `}
+          } z-50 `}
         >
           <div className="px-2 cursor-pointer hover:font-bold">Products</div>
           <div
             onMouseEnter={() => setSolutionIsClicked(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSolutionIsClicked((prev) => !prev);
+            }}
             className="px-2 cursor-pointer hover:font-bold flex items-center"
           >
             Solutions
             <IoChevronDown style={{ marginLeft: 3 }} />
           </div>
-          <div className="px-2 cursor-pointer hover:font-bold">About Us</div>
+          <div
+            className={`px-2 cursor-pointer hover:font-bold ${
+              currentPath === "/about" && "font-bold"
+            }`}
+          >
+            <Link href={"/about"}> About Us</Link>
+          </div>
           <div className="px-2 cursor-pointer hover:font-bold">News</div>
           <div className="px-2 cursor-pointer hover:font-bold">Contact Us</div>
         </div>
@@ -89,15 +100,10 @@ const TopNav = ({}: TopNavProps) => {
       <div
         className={`${
           isMenuOpen ? "block" : "hidden"
-        } md:hidden bg-white text-black absolute top-32 left-0 w-full z-40 shadow-lg`}
+        } md:hidden bg-white text-black fixed top-32 left-0 w-full z-50 shadow-lg`}
       >
         <div className="flex flex-col space-y-4 p-5">
-          <div
-            className="cursor-pointer hover:font-bold"
-            onClick={() => setSolutionIsClicked(false)}
-          >
-            Products
-          </div>
+          <div className="cursor-pointer hover:font-bold">Products</div>
           <div
             className="cursor-pointer hover:font-bold flex items-center"
             onClick={() => setSolutionIsClicked(!solutionIsClicked)}
@@ -122,80 +128,16 @@ const TopNav = ({}: TopNavProps) => {
             </div>
           )}
           <div
-            className="cursor-pointer hover:font-bold"
-            onClick={() => setSolutionIsClicked(false)}
+            className={`cursor-pointer hover:font-bold ${
+              currentPath === "/about" && "font-bold"
+            }`}
           >
-            About Us
+            <Link href={"/about"}> About Us</Link>
           </div>
-          <div
-            className="cursor-pointer hover:font-bold"
-            onClick={() => setSolutionIsClicked(false)}
-          >
-            News
-          </div>
-          <div
-            className="cursor-pointer hover:font-bold"
-            onClick={() => setSolutionIsClicked(false)}
-          >
-            Contact Us
-          </div>
-          <div className="border-t border-gray-300 mt-4 pt-4 justify-between">
-            <button
-              onClick={() => setSolutionIsClicked(false)}
-              className="px-4 py-2 border bg-custom-blue text-white rounded-xl text-center"
-            >
-              Get a Quote
-            </button>
-            <button
-              onClick={() => setSolutionIsClicked(false)}
-              className="border border-gray-400 px-4 py-2 rounded-xl text-center mb-2 ml-5"
-            >
-              Login
-            </button>
-          </div>
+          <div className="cursor-pointer hover:font-bold">News</div>
+          <div className="cursor-pointer hover:font-bold">Contact Us</div>
         </div>
       </div>
-
-      {/* Solutions dropdown for desktop */}
-      {solutionIsClicked && !isMenuOpen && (
-        <>
-          <div className="border-[1px] border-primary-gray mt-6" />
-
-          <div className="hidden md:flex flex-row justify-between mt-6 space-y-4 md:space-y-0">
-            <div className="md:w-1/5">
-              <div className="font-bold cursor-pointer">Solar Systems</div>
-              <div className="mt-3 text-sm">
-                Powering the next generation of sustainable energy management
-                and supply systems.
-              </div>
-            </div>
-
-            <div className="md:w-1/5">
-              <div className="font-bold cursor-pointer">Residential Solar</div>
-              <div className="mt-3 text-sm">
-                Powering the next generation of sustainable energy management
-                and supply systems.
-              </div>
-            </div>
-
-            <div className="md:w-1/5">
-              <div className="font-bold cursor-pointer">Commercial Solar</div>
-              <div className="mt-3 text-sm">
-                Powering the next generation of sustainable energy management
-                and supply systems.
-              </div>
-            </div>
-
-            <div className="md:w-1/5">
-              <div className="font-bold cursor-pointer">Battery Storage</div>
-              <div className="mt-3 text-sm">
-                Powering the next generation of sustainable energy management
-                and supply systems.
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };

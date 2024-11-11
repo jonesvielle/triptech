@@ -1,13 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { CSSProperties, useEffect, useRef, useState } from "react";
 
 interface BounceInComponentProps {
   children: React.ReactNode;
   className?: string;
+  style?: CSSProperties | undefined;
 }
 
 const BounceInComponent: React.FC<BounceInComponentProps> = ({
   children,
   className,
+  style,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -36,6 +38,7 @@ const BounceInComponent: React.FC<BounceInComponentProps> = ({
 
   return (
     <div
+      style={style}
       ref={ref}
       className={`transition-opacity duration-500 ${
         isVisible ? "animate-bounceIn" : "opacity-0"

@@ -272,7 +272,7 @@ export default function Home() {
             progressStyle={{ backgroundColor: "#117865" }}
           />
           {/* hero */}
-          <div className="hero flex flex-col w-full pb-16">
+          <div className="hero flex flex-col w-full pb-16 bg-red-00">
             {/* <div className="hero-background-overlay" /> */}
             <video autoPlay loop muted playsInline className="background-video">
               {/* <div className="hero-background-overlay" /> */}
@@ -281,7 +281,7 @@ export default function Home() {
             </video>
             <div className="color-overlay"></div>
 
-            <div className="flex z-10 flex-row items-center justify-center w-full md:mt-52 mt-36  mb-5 px-0 md:px-20">
+            <div className="flex z-70 flex-row items-center justify-center w-full md:mt-52 mt-36  mb-5 px-0 md:px-20">
               <div className="md:w-3/4 w-5/6">
                 {/* carousel */}
                 <div className="max-w-screen-lg mx-auto">

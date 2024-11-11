@@ -22,6 +22,7 @@ const config: Config = {
         "primary-dark": "#091629",
         "dark-green": "#004733",
         "primary-gray": "#D3D3D3",
+        "secondary-gray": "#686868",
       },
       borderWidth: {
         "4": "4px",
