@@ -802,7 +802,7 @@ const AboutPage = () => {
                   className={` mt-0 text-[12px] md:text-[18px] ${robotoFontBody.className} text-secondary-gray w-1/2`}
                 >
                   <b className="font-black text-black">
-                    CCTV Camera&apos;s Installed
+                    CCTV Cameras Installed
                   </b>{" "}
                   in over 120 homes and offices across Nigeria.
                 </div>

@@ -1,0 +1,15 @@
+# .pre-commit-config.yaml
+- repo: https://github.com/prettier/prettier
+  rev: "3.3.3" # Replace with the latest Prettier version
+  hooks:
+    - id: prettier
+      files: \.(js|ts|tsx|json|css|md)$
+      exclude: ^dist/
+
+- repo: https://github.com/eslint/eslint
+  rev: v8.45.0 # Specify your preferred version of ESLint
+  hooks:
+    - id: eslint
+      name: eslint
+      files: \.(js|ts|tsx)$
+      exclude: ^dist/
