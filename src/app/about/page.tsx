@@ -47,7 +47,7 @@ const AboutPage = () => {
           progressStyle={{ backgroundColor: "#117865" }}
         />
         {/* hero */}
-        <div className="landing flex flex-col w-full md:pt-60 pt-40 md:px-60 px-5">
+        <div className="landing-about flex flex-col w-full md:pt-60 pt-40 md:px-60 px-5">
           <div className="color-overlay"></div>
           <div
             className={`text-center ${robotoFont.className} md:text-[55px] text-[25px]`}

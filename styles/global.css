@@ -14,7 +14,7 @@
   overflow: hidden;
 }
 
-.landing {
+.landing-about {
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
     url("/images/solar-array.jpg");
   background-repeat: no-repeat;
@@ -22,7 +22,18 @@
   background-size: cover;
   position: relative;
   width: 100%;
-  height: 100vh; /* Full viewport height */
+  overflow: hidden;
+}
+
+.landing-contact {
+  background-image: linear-gradient(rgba(9, 22, 41, 0.6), rgba(9, 22, 41, 0.6)),
+    url("/images/heropanel.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  position: relative;
+  /* width: 100%;
+  height: 100vh;  */
   overflow: hidden;
 }
 
@@ -46,6 +57,14 @@
 
 .what-we-do {
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url("/images/heropanel.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.impeccable {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
     url("/images/heropanel.jpg");
   background-repeat: no-repeat;
   background-size: cover;

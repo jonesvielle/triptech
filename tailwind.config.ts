@@ -3,7 +3,7 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/componennts/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
@@ -21,8 +21,13 @@ const config: Config = {
         "primary-green": "#117865",
         "primary-dark": "#091629",
         "dark-green": "#004733",
+        "dark-green-1": "#1C3F3A",
         "primary-gray": "#D3D3D3",
         "secondary-gray": "#686868",
+        "light-gray": "#687486",
+        "very-light-gray": "#F2F0EC",
+        "light-blue": "#F5F7FF",
+        "dark-blue": "#0A2650",
       },
       borderWidth: {
         "4": "4px",

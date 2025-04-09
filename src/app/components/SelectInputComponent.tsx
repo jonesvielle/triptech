@@ -17,6 +17,7 @@ interface SelectInputComponentProps
   Icon?: ReactNode;
   name: string;
   required?: boolean;
+  data: string[];
 }
 {
   /* <IoCalendar className="mr-2 text-[30px] text-primary-gray" />; */
@@ -28,6 +29,7 @@ const SelectInputComponent = ({
   inputColor,
   Icon,
   name,
+  data,
   ...rest
 }: SelectInputComponentProps) => {
   return (
@@ -42,12 +44,15 @@ const SelectInputComponent = ({
           className="outline-none rounded-lg  w-full md:w-full text-black mt-1"
           color={inputColor}
         >
-          <option value={""} disabled>
+          <option value={placeholder} disabled>
             {placeholder}
           </option>
-          <option value={"Solar Installation"}>Solar Installation</option>
-          <option value={"CCTV Installation"}>CCTV installation</option>
-          <option value={"3D Printing Services"}>3D Printing Service</option>
+          {data &&
+            data.map((options, index) => (
+              <option key={index} value={options}>
+                {options}
+              </option>
+            ))}
         </select>
         {/* <IoChevronDown className="text-primary-gray text-[20px]" /> */}
       </div>

@@ -1,16 +1,18 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { IoChevronDown, IoMenu, IoClose } from "react-icons/io5";
+import { ABOUT_PAGE, CONTACT_PAGE } from "../helpers/routes";
 
-interface TopNavProps {
-  currentPath: string;
-}
+// interface TopNavProps {
+//   currentPath: string;
+// }
 
-const TopNav = ({ currentPath }: TopNavProps) => {
+const TopNav = () => {
   const router = useRouter();
+  const currentPath = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [solutionIsClicked, setSolutionIsClicked] = useState<boolean>(false);
   const [isHovered, setIsHovered] = useState<boolean>(false);
@@ -23,7 +25,10 @@ const TopNav = ({ currentPath }: TopNavProps) => {
 
   return (
     <div
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setSolutionIsClicked(false);
+      }}
       className={`absolute w-full py-4 px-5 md:px-10 z-10 ${
         solutionIsClicked || isHovered
           ? "bg-white text-black transition-all duration-300 ease-in-out"
@@ -42,7 +47,7 @@ const TopNav = ({ currentPath }: TopNavProps) => {
           width={150} // Adjusted for mobile
           alt="Logo"
           src={
-            solutionIsClicked || isHovered
+            solutionIsClicked
               ? "/images/logo/black-logo-text.png"
               : "/images/logo/white-logo-text.png"
           }
@@ -70,9 +75,12 @@ const TopNav = ({ currentPath }: TopNavProps) => {
         >
           <div className="px-2 cursor-pointer hover:font-bold">Products</div>
           <div
-            onMouseEnter={() => setIsHovered(true)}
+            onMouseEnter={() => {
+              setIsHovered(true);
+              setSolutionIsClicked(true);
+            }}
             onMouseLeave={() => setIsHovered(false)}
-            className="px-2 cursor-pointer hover:font-bold flex items-center"
+            className="px-2 cursor-pointer hover:font-bold flex items-center bg-red-5"
           >
             Solutions
             <IoChevronDown style={{ marginLeft: 3 }} />
@@ -82,10 +90,14 @@ const TopNav = ({ currentPath }: TopNavProps) => {
               currentPath === "/about" && "font-bold"
             }`}
           >
-            <Link href={"/about"}> About Us</Link>
+            <Link href={ABOUT_PAGE}> About Us</Link>
           </div>
           <div className="px-2 cursor-pointer hover:font-bold">News</div>
-          <div className="px-2 cursor-pointer hover:font-bold">Contact Us</div>
+          <Link href={CONTACT_PAGE}>
+            <div className="px-2 cursor-pointer hover:font-bold">
+              Contact Us
+            </div>
+          </Link>
         </div>
 
         {/* Call to Action Buttons */}
@@ -151,7 +163,7 @@ const TopNav = ({ currentPath }: TopNavProps) => {
             className="cursor-pointer hover:font-bold"
             onClick={() => setSolutionIsClicked(false)}
           >
-            Contact Us
+            <Link href={"/contact"}>Contact Us</Link>
           </div>
           <div className="border-t border-gray-300 mt-4 pt-4 justify-between">
             <button
