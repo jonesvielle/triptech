@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 "use client";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import "react-toastify/dist/ReactToastify.css"; // Import styles
 import "../../styles/global.css";
 import { ToastContainer, toast } from "react-toastify";
@@ -12,6 +12,7 @@ import {
   robotoFontBodyLight,
 } from "./helpers/fonts";
 import Image from "next/image";
+import Link from "next/link";
 import {
   IoCalendar,
   IoCall,
@@ -42,22 +43,57 @@ import {
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
+type FeaturedVideo = {
+  id: number;
+  title: string;
+  youtube_url: string;
+  summary: string;
+  thumbnail_url: string;
+};
+
+const fallbackVideos: FeaturedVideo[] = [
+  {
+    id: 0,
+    title: "TRI-P Tech project updates",
+    youtube_url: "https://www.youtube.com/@TRI-PTECH",
+    summary: "Visit our YouTube channel for installation updates, product demos, and project stories.",
+    thumbnail_url: "/images/print-car.jpg",
+  },
+];
+
+function youtubeVideoId(url: string) {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{6,})/);
+  return match?.[1] || "";
+}
+
+function videoThumbnail(video: FeaturedVideo) {
+  if (video.thumbnail_url) return video.thumbnail_url;
+  const id = youtubeVideoId(video.youtube_url);
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "/images/print-car.jpg";
+}
+
 // Define an interface for the form data
 export default function Home() {
   const quotationSectionRef = useRef<HTMLDivElement>(null);
   const serviceSectionRef = useRef<HTMLDivElement>(null);
 
   const [mailLoading, setMailLoading] = useState(false);
+  const [featuredVideos, setFeaturedVideos] = useState<FeaturedVideo[]>(fallbackVideos);
 
-  const handleScrollToQuotationSection = () => {
-    quotationSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  useEffect(() => {
+    fetch("/api/featured-videos")
+      .then((response) => response.json())
+      .then((data) => {
+        if (Array.isArray(data.videos) && data.videos.length) {
+          setFeaturedVideos(data.videos.slice(0, 3));
+        }
+      })
+      .catch(() => undefined);
+  }, []);
 
   const handleScrollToServiceSection = () => {
     serviceSectionRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
-  console.log("process.env.EMAIL_USER,", process?.env?.EMAIL_USER);
 
   const handleSubmitMailBook = async (
     payload: BookAppointmentRequestPayloadType
@@ -116,13 +152,10 @@ export default function Home() {
       });
 
       const responseData = await response.json();
-      console.log("response: ", responseData);
       setMailLoading(false);
 
       if (response.ok) {
-        toast.success("Appoitment was sent successfully", { autoClose: 5000 });
-
-        console.log("successfully sent");
+        toast.success("Appointment was sent successfully", { autoClose: 5000 });
       } else {
         toast.error(responseData.message, { autoClose: 5000 });
       }
@@ -190,7 +223,7 @@ export default function Home() {
       </table>
 
       <p style="text-align: center; margin-top: 20px; font-size: 14px; color: #666;">
-          Thee quotation request is received.
+          The quote request has been received.
       </p>
     </div>
   </body>
@@ -202,12 +235,9 @@ export default function Home() {
 
       const responseData = await response.json();
       setMailLoading(false);
-      console.log("response: ", responseData);
 
       if (response.ok) {
-        toast.success("Quotation was sent successfully", { autoClose: 5000 });
-
-        console.log("successfully sent");
+        toast.success("Quote request sent successfully", { autoClose: 5000 });
       } else {
         toast.error(responseData.message, { autoClose: 5000 });
       }
@@ -222,7 +252,6 @@ export default function Home() {
   const handleSubmitBook = (event: FormEvent<HTMLFormElement>) => {
     setMailLoading(true);
     event.preventDefault();
-    console.log("handleSubmitBook fired");
 
     // Create a new FormData object
     const formData = new FormData(event?.target);
@@ -233,7 +262,6 @@ export default function Home() {
       // console.log("loger", key, value);
       payload = { ...payload, [key]: value };
     }
-    console.log("payload", payload);
     if (payload) {
       handleSubmitMailBook(payload);
     }
@@ -243,8 +271,6 @@ export default function Home() {
     setMailLoading(true);
     event.preventDefault();
 
-    console.log("handleSubmitQuote fired");
-
     // Create a new FormData object
     const formData = new FormData(event?.target);
     // console.log("formData: " + JSON.stringify(formData))
@@ -254,7 +280,6 @@ export default function Home() {
       // console.log("loger", key, value);
       payload = { ...payload, [key]: value };
     }
-    console.log("payload quote", payload);
     // return;
     if (payload) {
       handleSubmitMailQuote(payload);
@@ -303,14 +328,14 @@ export default function Home() {
                       <div
                         className={`${robotoFont.className} text-[30px] md:text-[60px] font-bold`}
                       >
-                        Empowering a sustainable future for Africa with
-                        alternative power solutions
+                        Practical power, security, and product solutions for
+                        homes and businesses
                       </div>
                       <div className="mt-10 md:text-[20px] text-[15px] font-euclidLight text-center">
                         <SlideUpComponent>
-                          Explore our custom solar system, CCTV, and 3D printing
-                          services, as well as consultancy and product design
-                          expertise.
+                          TRI-P Tech Limited delivers solar systems, CCTV
+                          installation, 3D printing, and product design support
+                          with a focus on exceptional results.
                         </SlideUpComponent>
                       </div>
                     </div>
@@ -320,13 +345,12 @@ export default function Home() {
                       <div
                         className={`${robotoFont.className} text-[30px] md:text-[60px] font-bold`}
                       >
-                        Transform Ideas into Reality with Precision 3D Printing
+                        Turn product ideas into usable parts and prototypes
                       </div>
                       <div className="mt-10 md:text-[20px] text-[15px] font-euclidLight text-center">
                         <SlideUpComponent>
-                          Bring your ideas to life with Tri-P Tech’s
-                          high-quality 3D printing, delivering exceptional
-                          detail and accuracy to realize your vision.
+                          Move from sketch, sample, or concept to physical
+                          parts that can be tested, improved, and produced.
                         </SlideUpComponent>
                       </div>
                     </div>
@@ -336,13 +360,12 @@ export default function Home() {
                       <div
                         className={`${robotoFont.className} text-[30px] md:text-[60px] font-bold`}
                       >
-                        Secure Your World with Our Advanced CCTV Solutions
+                        Secure your property with planned CCTV coverage
                       </div>
                       <div className="mt-10 md:text-[20px] text-[15px] font-euclidLight text-center">
                         <SlideUpComponent>
-                          Safeguard what matters most with Tri-P Tech’s custom
-                          CCTV solutions, offering peace of mind for home or
-                          business through reliable, comprehensive coverage.
+                          We plan camera coverage around blind spots, access
+                          points, storage needs, and remote monitoring.
                         </SlideUpComponent>
                       </div>
                     </div>
@@ -356,12 +379,12 @@ export default function Home() {
                   >
                     Explore Our Services
                   </button>
-                  <button
-                    onClick={handleScrollToQuotationSection}
+                  <Link
+                    href="/services/solar/calculator"
                     className="md:ml-4 px-4 mt-5 md:mt-0 py-3 border border-w-4 border-custom-blue bg-custom-blue rounded-full"
                   >
-                    Get a Quote
-                  </button>
+                    Get a quote
+                  </Link>
                 </div>
               </div>
             </div>
@@ -383,7 +406,7 @@ export default function Home() {
           {/* about */}
           <div className="bg-white md:px-20  py-16 flex flex-col items-center">
             <div className="text-primary-green border-2 rounded-xxl py-2 px-4">
-              TRIP INNOVATIVE TECH
+              TRI-P Tech Limited
             </div>
             <div
               className={`${robotoFont.className} md:px-0 px-8 font-bold md:text-start text-center text-primary-dark mt-5 mb-10 md:text-[40px] text-[20px]`}
@@ -395,17 +418,16 @@ export default function Home() {
                 <p
                   className={`${robotoFontBody.className} md:text-[23px] text-[15px] md:text-start text-center`}
                 >
-                  TRI-P Innovative Solutions is an indigenous Solar energy,
-                  security systems and product modelling company based in
+                  TRI-P Tech Limited is an indigenous solar energy,
+                  security systems, and product modelling company based in
                   Nigeria.
                 </p>
                 <div
                   className={`${robotoFontBody.className} md:text-[23px] text-[15px] mt-5 md:text-start text-center`}
                 >
-                  Since 2021, we have been Africa&apos;s trusted partner for
-                  solar energy, cctv installation and 3d modelling and printing,
-                  design consultation. We currently have over 45 staff stationed
-                  strategically across the nation.
+                  Since 2021, we have supported customers with solar energy,
+                  CCTV installation, 3D modelling, 3D printing, and design
+                  consultation across Nigeria.
                 </div>
                 <div className="md:mt-0 mt-5">
                   <CheckList
@@ -428,7 +450,7 @@ export default function Home() {
                 <div className="p-5 flex flex-row items-center rounded-tl-xxl flex-row  w-4/5 bg-primary-green right-0 z-20 bottom-0 absolute">
                   <IoLockClosedSharp color="white" fontSize={20} />
                   <div className="text-white ml-3">
-                    <div>4000+ CCTV</div>
+                    <div>500+ CCTV</div>
                     <div>Systems installed</div>
                   </div>
                 </div>
@@ -482,140 +504,127 @@ export default function Home() {
               <div className="font-bold text-[70px] mt-5 md:mt-0">
                 <CountUp duration={5000} target={200} addedString="+" />
               </div>
-              <div>Satistied Clients</div>
-            </div>
-            <div>
-              <div className="font-bold text-[70px] mt-5 md:mt-0">
-                <CountUp duration={5000} target={100} addedString="+" />
-              </div>
-              <div>Qualified Staffs</div>
+              <div>Satisfied Clients</div>
             </div>
           </div>
           {/* our services */}
           <div
             ref={serviceSectionRef}
-            className="bg-white md:px-40 px-4 py-16 flex flex-col md:items-start items-center"
+            className="bg-white px-5 py-16 md:px-10"
           >
-            <div
-              className={`text-primary-green border-2 rounded-xxl py-2 px-4`}
-            >
-              OUR SERVICES
+            <div className="mx-auto max-w-7xl">
+              <div
+                className={`inline-flex rounded-full border-2 px-5 py-2 text-primary-green`}
+              >
+                OUR SERVICES
+              </div>
+              <div
+                className={`${robotoFont.className} mt-5 max-w-4xl text-center text-[30px] font-bold leading-tight text-primary-dark md:text-start md:text-[44px]`}
+              >
+                Practical engineering services
+              </div>
+              <div
+                className={`${robotoFont.className} max-w-4xl text-center text-[30px] font-bold leading-tight text-primary-green md:text-start md:text-[44px]`}
+              >
+                built around your project
+              </div>
+              <div
+                className={`${robotoFontBodyLight.className} mt-5 max-w-5xl text-center text-[16px] leading-8 text-black md:text-start md:text-[20px]`}
+              >
+                <SlideUpComponent>
+                  At TRI-P Tech Limited, we offer manufacturing, security,
+                  design, and electrification services tailored to your project
+                  requirements from planning to delivery.
+                </SlideUpComponent>
+              </div>
             </div>
-            <div
-              className={`${robotoFont.className} font-bold text-center md:text-start text-primary-dark mt-5 md:text-[40px] text-[20px] font-[700px]`}
-            >
-              We Push Beyond the Industry Standards &
-            </div>
-            <div
-              className={`${robotoFont.className} font-bold text-center md:text-start text-primary-green md:text-[40px] text-[20px] font-[700px]`}
-            >
-              Benchmarks for Service Delivery
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-black ml-2 md:text-[20px] text-[15px] mt-5 text-center md:text-start`}
-            >
-              <SlideUpComponent>
-                At Tri-P Innovative Tech, we offer a comprehensive suite of
-                manufacturing, security, design and electrification services,
-                meticulously tailored to match your unique project requirements,
-                ensuring success at every step.
-              </SlideUpComponent>
-            </div>
-            <div className="flex md:flex-row flex-col  mt-10 md:justify-start items-center md:items-start w-full">
-              <BounceInComponent>
-                <div className="h-[400px] w-[300px] relative md:mr-5 mr-0">
+            <div className="mx-auto mt-10 grid w-full max-w-7xl grid-cols-1 justify-items-center gap-6 md:grid-cols-3">
+              <div className="group relative h-[400px] w-full max-w-[360px] overflow-hidden rounded-xxl shadow-[0_18px_45px_rgba(3,48,62,0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_rgba(3,48,62,0.16)]">
                   <Image
-                    className="rounded-xxl"
+                    className="rounded-xxl transition duration-500 group-hover:scale-105"
                     layout="fill"
                     objectFit="cover"
-                    alt="About Us"
+                    alt="Solar panels installed on a roof"
                     src={"/images/solar-array.jpg"}
                     priority
-                    style={{ zIndex: 1 }} // Ensures the image is behind the overlay div
+                    style={{ zIndex: 1 }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black z-50 rounded-xxl opacity-100">
+                  <div className="absolute inset-0 z-50 rounded-xxl bg-gradient-to-b from-black/5 via-black/30 to-black/90 opacity-100">
                     <div className="absolute text-white z-[150] bottom-0 mb-12 px-5 opacity-100">
-                      <div className="font-bold">
-                        Customer Solar Installation
-                      </div>
-                      <div className="mt-1 text-[15px] ] z-[150]">
-                        The Sun is our witness. We harness the power of the Sun
-                        at Tri-P Tech with our cutting edge Solar Panels.
+                      <div className="font-bold">Custom Solar Installation</div>
+                      <div className="mt-2 text-[15px] leading-6 z-[150]">
+                        We design and install practical solar systems for homes,
+                        businesses, and project sites.
                       </div>
                       <div className="flex flex-row mt-4">
-                        <button
-                          // onClick={pause}
+                        <Link
+                          href="/services/solar"
                           className="border border-white px-4 py-2 rounded-full mt-5 bg-white text-custom-blue text-[15px] z-[150]"
                         >
                           Learn more
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
                 </div>
-              </BounceInComponent>
 
-              <BounceInComponent>
-                <div className="h-[400px] w-[300px] relative md:mt-0 mt-10">
+              <div className="group relative h-[400px] w-full max-w-[360px] overflow-hidden rounded-xxl shadow-[0_18px_45px_rgba(3,48,62,0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_rgba(3,48,62,0.16)]">
                   <Image
-                    className="rounded-xxl"
+                    className="rounded-xxl transition duration-500 group-hover:scale-105"
                     layout="fill"
                     objectFit="cover"
-                    alt="About Us"
-                    src={"/images/cctv.jpg"}
+                    alt="CCTV security camera installation"
+                    src={"/images/secure-cam.jpg"}
                     priority
-                    style={{ zIndex: 1 }} // Ensures the image is behind the overlay div
+                    style={{ zIndex: 1 }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg-gray-400 to-black z-50 rounded-xxl opacity-100">
+                  <div className="absolute inset-0 z-50 rounded-xxl bg-gradient-to-b from-black/5 via-black/35 to-black/90 opacity-100">
                     <div className="absolute text-white z-[150] bottom-0 mb-12 px-5 opacity-100">
                       <div className="font-bold">Custom CCTV Installation</div>
-                      <div className="mt-1 text-[15px] ] z-[150]">
-                        Our CCTV systems provide peace of mind for you, your
-                        business, property, staff and clients.
+                      <div className="mt-2 text-[15px] leading-6 z-[150]">
+                        We set up CCTV systems that help protect homes, offices,
+                        staff, property, and clients.
                       </div>
                       <div className="flex flex-row mt-4">
-                        <button
-                          // onClick={pause}
+                        <Link
+                          href="/services/cctv-installation"
                           className="border border-white px-4 py-2 rounded-full mt-5 bg-white text-custom-blue text-[15px] z-[150]"
                         >
                           Learn more
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
                 </div>
-              </BounceInComponent>
 
-              <BounceInComponent>
-                <div className="h-[400px] w-[300px] relative md:ml-5 ml-0 md:mt-0 mt-10">
+              <div className="group relative h-[400px] w-full max-w-[360px] overflow-hidden rounded-xxl shadow-[0_18px_45px_rgba(3,48,62,0.12)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_55px_rgba(3,48,62,0.16)]">
                   <Image
-                    className="rounded-xxl"
+                    className="rounded-xxl transition duration-500 group-hover:scale-105"
                     layout="fill"
                     objectFit="cover"
-                    alt="About Us"
+                    alt="3D printer producing a model"
                     src={"/images/print-car.jpg"}
                     priority
-                    style={{ zIndex: 1 }} // Ensures the image is behind the overlay div
+                    style={{ zIndex: 1 }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black z-50 rounded-xxl opacity-100">
+                  <div className="absolute inset-0 z-50 rounded-xxl bg-gradient-to-b from-black/5 via-black/35 to-black/90 opacity-100">
                     <div className="absolute text-white z-[150] bottom-0 mb-12 px-5 opacity-100">
                       <div className="font-bold">3D Printing & Machining</div>
-                      <div className="mt-1 text-[15px] ] z-[150]">
-                        Our advanced 3d printers bring your deisgns to life with
-                        precision and efficiency.
+                      <div className="mt-2 text-[15px] leading-6 z-[150]">
+                        We support product ideas, prototypes, custom parts, and
+                        precise fabrication work.
                       </div>
                       <div className="flex flex-row mt-4">
-                        <button
-                          // onClick={pause}
+                        <Link
+                          href="/services/3d-printing"
                           className="border border-white px-4 py-2 rounded-full mt-5 bg-white text-custom-blue text-[15px] z-[150]"
                         >
                           Learn more
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
                 </div>
-              </BounceInComponent>
             </div>
           </div>
           {/* Book appointment */}
@@ -634,26 +643,23 @@ export default function Home() {
                 <div
                   className={`${robotoFont.className} text-white my-5 md:text-[40px] text-[20px] md:text-start text-center`}
                 >
-                  Schedule a Consultation With one of Our Experts
+                  Schedule a consultation with one of our experts
                 </div>
                 <div
                   className={`${robotoFontBodyLight.className} text-white ml-2 md:text-[20px] text-[15px] mt-5  md:text-start text-center`}
                 >
                   <SlideUpComponent>
-                    We do in-person or video consultations on product design and
-                    TRI-P Innovative Solutions on indigenous Solar energy,
-                    security systems and product modelling company based in
-                    Nigeria.
+                    We offer in-person and video consultations for solar power,
+                    security systems, product design, modelling, and 3D
+                    printing projects across Nigeria.
                   </SlideUpComponent>
                 </div>
                 <div
                   className={`${robotoFontBodyLight.className} text-white ml-2 md:text-[20px] text-[15px] mt-5  md:text-start text-center`}
                 >
                   <SlideUpComponent>
-                    We do in-person or video consultations on product design and
-                    , TRI-P Innovative Solutions is an indigenous Solar energy,
-                    security systems and product modelling company based in
-                    Nigeria.
+                    Our team reviews your requirements, recommends practical
+                    options, and helps you plan the next step with confidence.
                   </SlideUpComponent>
                 </div>
               </div>
@@ -716,7 +722,7 @@ export default function Home() {
                     type="submit"
                     className="bg-custom-blue mt-10 text-center py-4 rounded-full w-full"
                   >
-                    {mailLoading ? "Please wait..." : " Submit Request"}
+                    {mailLoading ? "Please wait..." : "Submit request"}
                   </button>
                 </form>
               </div>
@@ -754,11 +760,10 @@ export default function Home() {
                 className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[10px] mt-5`}
               >
                 <SlideUpComponent>
-                  Harnessing the power of the sun is a smart sustainable way to
-                  power our homes and yet a universal right In an era of rising
-                  energy costs and growing environmental awareness, solar energy
-                  has emerged as a vital solution for sustainable power and
-                  alternative energy supply.
+                  TRI-P Tech builds smart and affordable power solutions for
+                  homes, offices, and businesses. Our solar and battery systems
+                  are planned around real energy needs, practical installation,
+                  and reliable everyday backup.
                 </SlideUpComponent>
               </div>
               <div className="flex flex-row md:text-start items-center justify-between md:mt-10 mt-5">
@@ -792,12 +797,12 @@ export default function Home() {
                   <div
                     className={`${robotoFontBody.className} font-[500px] text-primary-green md:text-[55px] text-[25px]`}
                   >
-                    <CountUp target={12} duration={5000} addedString="k KW" />
+                    <CountUp target={500} duration={5000} addedString=" kW+" />
                   </div>
                   <div
                     className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[7px] mt-2 w-1/2`}
                   >
-                    Energy Generated
+                    Solar Capacity Installed
                   </div>
                 </div>
               </div>
@@ -825,11 +830,10 @@ export default function Home() {
                 className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[10px] mt-5`}
               >
                 <SlideUpComponent>
-                  We provide customized surveillance solutions designed to give
-                  you peace of mind. Whether for your home or business, our
-                  state-of-the-art cameras and monitoring systems ensure
-                  comprehensive coverage and unmatched reliability. Enhance your
-                  security with our expert installations.
+                  We plan CCTV systems around real blind spots, access points,
+                  storage needs, and remote viewing. From homes to business
+                  sites, TRI-P Tech installs practical security coverage that is
+                  easy to monitor and maintain.
                 </SlideUpComponent>
               </div>
               <div className="flex flex-row md:text-start items-center justify-between md:mt-10 mt-5">
@@ -863,12 +867,12 @@ export default function Home() {
                   <div
                     className={`${robotoFontBody.className} font-[500px] text-primary-green md:text-[55px] text-[25px]`}
                   >
-                    <CountUp target={12} duration={5000} addedString="k KW" />
+                    <CountUp target={500} duration={5000} addedString="+" />
                   </div>
                   <div
                     className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[7px] mt-2 md:w-1/2 w-4/5`}
                   >
-                    Homes & Offices Secured
+                    CCTV Systems Installed
                   </div>
                 </div>
               </div>
@@ -894,20 +898,20 @@ export default function Home() {
             <div
               className={`${robotoFont.className} text-white md:text-[40px] text-[20px] font-[700px] md:w-1/2 text-center mt-10 md:mt-20`}
             >
-              Benefits of choosing tri-p tech&apos;s Solutions
+              Benefits of choosing TRI-P Tech solutions
             </div>
             <div className="flex md:flex-row flex-col md:justify-between items-center md:items-start md:mt-16 mt-8">
               <div className="md:w-1/5 md:block flex flex-col items-center">
                 <IoSnowSharp className="text-[50px]" />
                 <div className="text-white text-sm md:text-[20px] font-bold text-[10px] md:mt-10 mt-5 md:text-start text-center">
-                  Products & Service Warranty
+                  Product and service warranty
                 </div>
                 <div
                   className={`${robotoFontBodyLight.className} text-center md:text-start text-white md:text-[20px] text-[15px] mt-7`}
                 >
                   <SlideUpComponent>
-                    All our installations and products comes with a 60 Month
-                    Warranty available on request with period.
+                    Our installations are delivered with clear warranty
+                    guidance and support terms.
                   </SlideUpComponent>
                 </div>
               </div>
@@ -915,14 +919,14 @@ export default function Home() {
               <div className="md:w-1/5 md:block flex flex-col items-center md:mt-0 mt-14">
                 <IoGridSharp className="text-[50px]" />
                 <div className="text-white text-sm md:text-[20px] font-bold text-[10px] md:mt-10 mt-5 md:text-start text-center">
-                  Off-Grid Energy Reliance
+                  Off-grid energy reliability
                 </div>
                 <div
                   className={`${robotoFontBodyLight.className} text-center md:text-start text-white md:text-[20px] text-[15px] mt-7`}
                 >
                   <SlideUpComponent>
-                    Cost of maintaining our solar systems are very low compared
-                    to other altern energy sources.
+                    Properly sized solar systems can reduce generator use and
+                    improve day-to-day power stability.
                   </SlideUpComponent>
                 </div>
               </div>
@@ -930,14 +934,14 @@ export default function Home() {
               <div className="md:w-1/5 md:block flex flex-col items-center md:mt-0 mt-14">
                 <IoCallSharp className="text-[50px]" />
                 <div className="text-white text-sm md:text-[20px] font-bold text-[10px] md:mt-10 mt-5 md:text-start text-center">
-                  24/7 Customer Support Service
+                  Responsive customer support
                 </div>
                 <div
                   className={`${robotoFontBodyLight.className} text-center md:text-start text-white md:text-[20px] text-[15px] mt-7`}
                 >
                   <SlideUpComponent>
-                    From drafting proposals to submitting applications for
-                    interconnectionn we are with you to the end.
+                    We support customers from first enquiry to project review,
+                    installation, and follow-up.
                   </SlideUpComponent>
                 </div>
               </div>
@@ -945,14 +949,14 @@ export default function Home() {
               <div className="md:w-1/5 md:block flex flex-col items-center md:mt-0 mt-14">
                 <IoCashSharp className="text-[50px]" />
                 <div className="text-white text-sm md:text-[20px] font-bold text-[10px] md:mt-10 mt-5 md:text-start text-center">
-                  Flexible Rates and Plans
+                  Practical pricing guidance
                 </div>
                 <div
                   className={`${robotoFontBodyLight.className} text-center md:text-start text-white md:text-[20px] text-[15px] mt-7`}
                 >
                   <SlideUpComponent>
-                    Our pricing mirrors our flexiblw service. Competitive rates
-                    vary with project volume & size
+                    We help customers understand project cost based on load,
+                    equipment selection, site needs, and installation scope.
                   </SlideUpComponent>
                 </div>
               </div>
@@ -965,21 +969,21 @@ export default function Home() {
                 <div
                   className={`${robotoFont.className} text-white md:text-[40px] text-[20px] font-[700px]`}
                 >
-                  Get Live CCTV Project Quotation
+                  Get a CCTV project quote
                 </div>
                 <div
                   className={`${robotoFontBodyLight.className} text-white md:ml-2 md:text-[20px] text-[15px] mt-5`}
                 >
-                  Just enter your numner of cameras, the number of entry and
-                  exit points and get a quote instantly
+                  Tell us the number of cameras, entry points, and exit points
+                  so we can estimate the project scope.
                 </div>
                 <div className="flex">
-                  <button
-                    onClick={handleScrollToQuotationSection}
+                  <Link
+                    href="/services/cctv-installation#cctv-quote"
                     className="px-4 py-3 border border-w-4 border-white text-primary-dark bg-white rounded-full mt-5"
                   >
                     Get quote now
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -994,374 +998,131 @@ export default function Home() {
             <div
               className={`${robotoFont.className} font-bold  text-black md:text-[36px] text-[20px] font-[700px] md:w-1/2 w-3/4 text-center mt-5`}
             >
-              Check Our Youtube Channel To Keep Up
+              Watch the latest
             </div>
             <div
               className={`${robotoFont.className} font-bold  text-primary-green md:text-[36px] text-[20px] font-[700px] md:w-1/2 w-3/4 text-center md:mt-5 mt-2`}
             >
-              With Latest Printing Trends
+              TRI-P Tech updates
             </div>
-            <div className="flex md:flex-row flex-col justify-center mt-10">
-              <div className="md:w-1/3 md:mr-10 md:px-0 px-5 md:mb-0 mb-10">
-                <div className="w-full h-[200px] relative">
-                  <Image
-                    className="rounded-lg"
-                    layout="fill"
-                    objectFit="cover"
-                    alt="About Us"
-                    src={"/images/print-car.jpg"}
-                    priority
-                  />
-                </div>
-                <div className="text-black text-sm md:text-[20px] font-bold text-[10px] mt-10">
-                  Rapid prototyping with speed, precision, and creativity
-                </div>
-                <div
-                  className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[15px] md:mt-7 mt-3`}
+            <div className="mt-12 grid w-full max-w-6xl grid-cols-1 justify-items-center gap-8 px-5 md:grid-cols-2 lg:grid-cols-3">
+              {featuredVideos.map((video) => (
+                <a
+                  key={video.id}
+                  href={video.youtube_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block w-full max-w-sm rounded-xl border border-[#d8e7e3] bg-white p-4 text-center shadow-sm transition hover:-translate-y-1 hover:border-primary-green hover:shadow-[0_18px_38px_rgba(17,120,101,0.14)]"
                 >
-                  Our advanced printing technology and expert team are here to
-                  help you achieve your vision
-                </div>
-              </div>
-
-              <div className="md:w-1/3 md:mr-10 md:px-0 px-5 md:mb-0 mb-10">
-                <div className="w-full h-[200px] relative">
-                  <Image
-                    className="rounded-lg"
-                    layout="fill"
-                    objectFit="cover"
-                    alt="About Us"
-                    src={"/images/print-car.jpg"}
-                    priority
-                  />
-                </div>
-                <div className="text-black text-sm md:text-[20px] font-bold text-[10px] mt-10">
-                  Rapid prototyping with speed, precision, and creativity
-                </div>
-                <div
-                  className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[15px] md:mt-7 mt-3`}
-                >
-                  Our advanced printing technology and expert team are here to
-                  help you achieve your vision
-                </div>
-              </div>
-
-              <div className="md:w-1/3 md:mr-10 md:px-0 px-5 md:mb-0 mb-10">
-                <div className="w-full h-[200px] relative">
-                  <Image
-                    className="rounded-lg"
-                    layout="fill"
-                    objectFit="cover"
-                    alt="About Us"
-                    src={"/images/print-car.jpg"}
-                    priority
-                  />
-                </div>
-                <div className="text-black text-sm md:text-[20px] font-bold text-[10px] mt-10">
-                  Rapid prototyping with speed, precision, and creativity
-                </div>
-                <div
-                  className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[15px] md:mt-7 mt-3`}
-                >
-                  Our advanced printing technology and expert team are here to
-                  help you achieve your vision
-                </div>
-              </div>
+                  <div className="relative h-[210px] w-full overflow-hidden rounded-lg bg-[#082c3a] shadow-sm">
+                    <img
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                      alt={video.title}
+                      src={videoThumbnail(video)}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#082c3a]/70 via-transparent to-transparent" />
+                    <span className="absolute bottom-4 left-4 rounded-full bg-white px-4 py-2 text-xs font-bold text-primary-dark">
+                      Watch on YouTube
+                    </span>
+                  </div>
+                  <div className="mt-6 text-base font-bold text-black transition group-hover:text-primary-green md:text-[20px]">
+                    {video.title}
+                  </div>
+                  <div
+                    className={`${robotoFontBodyLight.className} mx-auto mt-3 max-w-xs text-[15px] leading-7 text-black md:text-[18px]`}
+                  >
+                    {video.summary || "Watch this update from TRI-P Tech."}
+                  </div>
+                </a>
+              ))}
             </div>
-            <div className="flex mt-10">
-              <div className="text-custom-blue border-2 border-custom-blue rounded-xxl py-2 px-20">
+            <div className="flex mt-10 justify-center">
+              <a
+                href="https://www.youtube.com/@TRI-PTECH"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border-2 border-custom-blue px-10 py-3 text-center font-semibold text-custom-blue transition hover:bg-custom-blue hover:text-white md:px-20"
+              >
                 View latest videos
-              </div>
+              </a>
             </div>
           </div>
           {/* Request a quote */}
           <div
             ref={quotationSectionRef}
-            className="flex flex-col bg-white py-16 flex flex-row items-start justify-between border-2"
+            className="bg-white px-5 py-16 md:px-10"
           >
-            <div className="md:w-full md:h-[1000px] md:block hidden absolute">
-              <Image
-                className="rounded-lg"
-                layout="fill"
-                objectFit="contain"
-                alt="About Us"
-                src={"/images/curve-green.png"}
-                priority
-              />
-            </div>
-            <div className="sm:w-full sm:h-[1000px] sm:block md:hidden absolute">
-              <Image
-                width={600}
-                className="rounded-lg"
-                objectFit="cover"
-                alt="About Us"
-                src={"/images/curve-green.png"}
-                priority
-                height={600}
-              />
-            </div>
-            <div className="z-20 w-full flex flex-col md:px-20 px-5 items-center  md:mt-32 mt-0">
-              <div className="flex">
-                <div className="text-white rounded-xxl py-2">
-                  Request a Quote
-                </div>
-              </div>
-              <div
-                className={`${robotoFont.className} font-bold text-white md:text-[40px] text-[20px] font-[700px] md:w-1/2 text-center md:mt-5`}
-              >
-                get your free personlized quote today from our experts.
-              </div>
-              <form
-                onSubmit={handleSubmitQuote}
-                className="flex w-full md:flex-row flex-col md:p-10 p-5  md:mt-10 mt-5 justify-center bg-white rounded-xl"
-              >
-                <div className="md:w-2/5 md:mr-10">
-                  <div
-                    className={`${robotoFont.className} text-black md:text-[30px] text-[12px] font-[700px] w-1/2 text-start`}
-                  >
-                    Fill in your details
+            <div className="mx-auto max-w-7xl overflow-hidden rounded-[28px] border border-[#cfe3df] bg-[#f6fbfa] shadow-[0_24px_70px_rgba(3,48,62,0.08)]">
+              <div className="grid gap-8 p-6 md:grid-cols-[1fr_0.9fr] md:p-10 lg:p-14">
+                <div>
+                  <div className="inline-flex rounded-full border border-[#b8d8d2] bg-white px-5 py-2 text-sm font-semibold uppercase tracking-[0.18em] text-primary-green">
+                    Solar quote calculator
                   </div>
-                  <div
-                    className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[15px] mt-7`}
+                  <h2
+                    className={`${robotoFont.className} mt-6 max-w-3xl text-[32px] font-bold leading-tight text-primary-dark md:text-[48px]`}
                   >
-                    Our advanced printing technology and expert team are here to
-                    help you achieve your vision
-                  </div>
-                  <div
-                    className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[15px] mt-7`}
+                    Start your solar estimate with practical load details.
+                  </h2>
+                  <p
+                    className={`${robotoFontBodyLight.className} mt-6 max-w-2xl text-[16px] leading-8 text-[#264955] md:text-[19px]`}
                   >
-                    Take the first step towards a brighter, cleaner, and more
-                    cosr-effectiv e future. Conatct us for free a personalized
-                    quote and discover the countless benefits of switching to
-                    alternative energy.
-                  </div>
-                  <div
-                    className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[15px] mt-7`}
+                    Instead of a basic form, the calculator captures your loads,
+                    daily usage, equipment recommendation, and estimated system
+                    cost before TRI-P reviews the final quote.
+                  </p>
+                  <p
+                    className={`${robotoFontBodyLight.className} mt-4 max-w-2xl text-[16px] leading-8 text-[#264955] md:text-[19px]`}
                   >
-                    Connect with our experts to review your solar power needs,
-                    cctv system or 3d printing needs either over the phone or
-                    in-person.
-                  </div>
-                  <div className="flex flex-row items-center mt-16">
-                    <IoCall className=" text-[20px] rounded-full text-custom-blue" />
-                    <div className="text-black ml-5">
+                    It gives our engineers better information and helps you see
+                    what the project may require before a site inspection.
+                  </p>
+
+                  <div className="mt-8 flex flex-col gap-3 text-[15px] text-primary-dark sm:flex-row sm:flex-wrap">
+                    <div className="inline-flex items-center rounded-full bg-white px-4 py-3 shadow-sm">
+                      <IoCall className="mr-3 text-[18px] text-custom-blue" />
                       {process.env.NEXT_PUBLIC_COMPANY_PHONE}
                     </div>
-                  </div>
-
-                  <div className="flex flex-row items-center mt-5">
-                    <IoLocation className="text-[20px] rounded-full text-custom-blue" />
-                    <div className="text-black md:ml-5 ml-2">
-                      {process.env.NEXT_PUBLIC_COMPANY_ADDRESS}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-row items-center mt-5">
-                    <IoMailOpen className="text-[20px] rounded-full text-custom-blue" />
-                    <div className="text-black  md:ml-5 ml-2 text-wrap break-words">
+                    <div className="inline-flex items-center rounded-full bg-white px-4 py-3 shadow-sm">
+                      <IoMailOpen className="mr-3 text-[18px] text-custom-blue" />
                       {process.env.NEXT_PUBLIC_SUPPORTEMAILADDRESS}
                     </div>
                   </div>
                 </div>
-                <div className="mx-4  w-px bg-primary-gray"></div>
 
-                <div className="flex md:ml-10 flex-col md:w-2/6  mt-10 md:mt-0">
-                  <div>
-                    <div
-                      className={`${robotoFont.className} text-black md:text-[20px] text-[12px] font-[700px] w-1/2 text-start`}
+                <div className="flex items-center">
+                  <div className="w-full rounded-[24px] border border-[#d5e7e4] bg-white p-6 shadow-sm md:p-8">
+                    <div className="inline-flex rounded-full bg-[#edf8f5] px-4 py-2 text-sm font-semibold text-primary-green">
+                      Quote journey
+                    </div>
+                    <div className="mt-7 space-y-5 text-primary-dark">
+                      {[
+                        "Enter appliances and operating hours",
+                        "Review battery, inverter, panel, and cost estimate",
+                        "Send a complete quote request to TRI-P",
+                      ].map((item, index) => (
+                        <div key={item} className="flex items-start">
+                          <span className="mr-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-custom-blue text-sm font-bold text-white">
+                            {index + 1}
+                          </span>
+                          <span className="pt-1 text-[15px] leading-6">
+                            {item}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <Link
+                      href="/services/solar/calculator"
+                      className="mt-8 block rounded-full bg-custom-blue px-6 py-4 text-center font-bold text-white shadow-[0_16px_32px_rgba(0,41,173,0.18)] transition hover:-translate-y-0.5 hover:bg-primary-green"
                     >
-                      Personal Information
-                    </div>
-                    <div className="mt-5">
-                      <InputComponent
-                        required
-                        label="Full name"
-                        name="fullName"
-                        placeholder="Full Name"
-                      />
-                    </div>
-                    <div className="flex flex-col w-full ml-0 mt-3">
-                      <InputComponent
-                        required
-                        placeholder="Enter phone"
-                        label="Phone number"
-                        name="phone"
-                      />
-                    </div>
-
-                    <div className="flex flex-col w-full mt-3">
-                      <InputComponent
-                        required
-                        type="email"
-                        placeholder="Enter email address"
-                        label="Email address"
-                        name="email"
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-10">
-                    <div className="mt-5">
-                      <SelectInputComponent
-                        required
-                        name="serviceRequired"
-                        label="Service required"
-                        placeholder="Select a service"
-                      />
-                    </div>
-                    <div className="mt-5">
-                      <AreaInputComponent
-                        required
-                        name="fullDescription"
-                        placeholder="Full Description"
-                      />
-                    </div>
-                    <div className="mt-5">
-                      <InputComponent
-                        required
-                        type="date"
-                        Icon={
-                          <IoCalendar className="text-[30px] text-primary-gray" />
-                        }
-                        placeholder="Enter appointment date & time"
-                        label="Appointment Date & Time"
-                        name="appointmentDate"
-                      />
-                    </div>
-
-                    <button
-                      disabled={mailLoading}
-                      type="submit"
-                      className="bg-custom-blue mt-10 text-center py-4 rounded-full w-full"
-                    >
-                      {mailLoading ? "Please wait..." : " Submit Request"}
-                    </button>
+                      Open solar calculator
+                    </Link>
                   </div>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </main>
-        <footer className="bg-primary-dark md:px-28 px-7 py-20 flex md:flex-row flex-col items-center">
-          <div className="md:w-1/3 md:mr-20">
-            <Image
-              style={{ zIndex: 2 }}
-              // layout="responsive"
-              height={100}
-              width={200}
-              alt="Logo"
-              src={"/images/logo/white-logo-text.png"}
-              priority
-            />
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] md:text-[15px] text-[10px] mt-7`}
-            >
-              Experts in CCTV installation, Solar Systemts installation, 3D
-              Printing and Modelling, Prototyping and Design Consultation
-              Services. Contact us anytime to get a free quote.
-            </div>
-            <div className="flex flex-row mt-10">
-              <a
-                className="rounded-full"
-                href={process.env.NEXT_PUBLIC_FACEBOOKPAGE}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <IoLogoFacebook className="text-[50px] rounded-full text-primary-dark bg-white p-3" />
-              </a>
-              <a
-                className="rounded-full ml-8"
-                href={process.env.NEXT_PUBLIC_INSTAGRAM}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <IoLogoInstagram className="text-[50px] rounded-full text-primary-dark bg-white p-3" />
-              </a>
-              <a
-                className="rounded-full ml-8"
-                href={process.env.NEXT_PUBLIC_LINKEDIN}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <IoLogoLinkedin className="text-[50px] rounded-full text-primary-dark bg-white p-3" />
-              </a>
-              <IoLogoWhatsapp className="text-[50px] rounded-full text-primary-dark bg-white p-3 ml-8" />
-              {/* <IoLogoTwitter className="text-[50px] rounded-full text-primary-dark bg-white p-3 ml-8" /> */}
-            </div>
-          </div>
-          <div className="flex flex-row md:mt-0 mt-10">
-            <div>
-              <div className="font-bold">Our Solutions</div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                Solar Systems
-              </div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                Residential Solar
-              </div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                Commercial Solar
-              </div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                Battery Storage
-              </div>
-            </div>
-
-            <div className="md:ml-36 ml-5">
-              <div className="font-bold">Our Services</div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                Solar Installations
-              </div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                Design Consultation
-              </div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                CCTV Installation
-              </div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                3D Printing
-              </div>
-            </div>
-
-            <div className="md:ml-36 ml-5">
-              <div className="font-bold">Company</div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                About Us
-              </div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                Contact Us
-              </div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                Latest News
-              </div>
-              <div
-                className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-              >
-                Live Chat
-              </div>
-            </div>
-          </div>
-        </footer>
+        
       </div>
     </>
   );

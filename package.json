@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "check:solar": "node scripts/check-solar-engine.cjs",
     "start": "next start",
     "lint": "next lint"
   },
@@ -17,6 +18,7 @@
     "next": "14.2.11",
     "next-google-fonts": "^2.2.0",
     "nodemailer": "^6.9.15",
+    "pg": "^8.22.0",
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.3.0",
@@ -27,6 +29,7 @@
   "devDependencies": {
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.16",
+    "@types/pg": "^8.20.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@typescript-eslint/eslint-plugin": "^6.21.0",

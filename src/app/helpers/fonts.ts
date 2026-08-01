@@ -1,19 +1,15 @@
-import { Roboto, Nunito } from "next/font/google";
+export const robotoFont = {
+  className: "font-sans",
+};
 
-export const robotoFont = Roboto({
-  subsets: ["latin"],
-  weight: "900",
-});
+export const robotoFontBody = {
+  className: "font-sans",
+};
 
-export const robotoFontBody = Roboto({
-  subsets: ["latin"],
-  weight: "400",
-});
-export const robotoFontBodyLight = Roboto({
-  subsets: ["latin"],
-  weight: "300",
-});
-export const nunitoFont = Nunito({
-  subsets: ["latin"],
-  weight: "800",
-});
+export const robotoFontBodyLight = {
+  className: "font-sans",
+};
+
+export const nunitoFont = {
+  className: "font-sans",
+};

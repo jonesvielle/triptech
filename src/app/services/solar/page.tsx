@@ -5,6 +5,7 @@ import "../../../../styles/global.css";
 import { ToastContainer } from "react-toastify";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   IoArrowForward,
   IoBatteryFullSharp,
@@ -43,9 +44,6 @@ import {
 import SlideUpComponent from "@/app/components/SlideUpComponent";
 import BounceInComponent from "@/app/components/BounceInComponent";
 import CountUp from "@/app/components/CountUpAnimation";
-import AreaInputComponent from "@/app/components/AreaInputComponent";
-import InputComponent from "@/app/components/InputComponent";
-import SelectInputComponent from "@/app/components/SelectInputComponent";
 import { title } from "process";
 
 // interface AboutPageProps {}
@@ -65,37 +63,37 @@ const AboutPage = () => {
   const strategyList = [
     {
       title: "Consultative Partnership",
-      body: "Our team of skilled engineers and designers bring extensive experience and knowledge to every project, guaranteeing exceptional results. Our skilled engineers are committed to delivering high-quality surveillance systems that meet your exact specifications and exceed your expectations. Our innovative approach and use of advanced technology enable us to provide the most effective and reliable security solutions.",
+      body: "We start by understanding the load, usage pattern, site condition, and customer expectations before recommending a solar setup.",
     },
     {
-      title: "Customizable Solutions",
-      body: "Our team of skilled engineers and designers bring extensive experience and knowledge to every project, guaranteeing exceptional results. Our skilled engineers are committed to delivering high-quality surveillance systems that meet your exact specifications and exceed your expectations. Our innovative approach and use of advanced technology enable us to provide the most effective and reliable security solutions.",
+      title: "Practical system sizing",
+      body: "We size the panels, battery bank, inverter, and protection items around the actual appliances and expected backup time.",
     },
     {
-      title: "Instalmental Payment Plan",
-      body: "Our team of skilled engineers and designers bring extensive experience and knowledge to every project, guaranteeing exceptional results. Our skilled engineers are committed to delivering high-quality surveillance systems that meet your exact specifications and exceed your expectations. Our innovative approach and use of advanced technology enable us to provide the most effective and reliable security solutions.",
+      title: "Budget guidance",
+      body: "We help customers compare practical equipment options and understand the estimated cost before the final site inspection.",
     },
     {
-      title: "Expert Team",
-      body: "Our team of skilled engineers and designers bring extensive experience and knowledge to every project, guaranteeing exceptional results. Our skilled engineers are committed to delivering high-quality surveillance systems that meet your exact specifications and exceed your expectations. Our innovative approach and use of advanced technology enable us to provide the most effective and reliable security solutions.",
+      title: "Installation review",
+      body: "Before final delivery, the recommended setup is reviewed against site realities such as cable route, mounting position, ventilation, and protection needs.",
     },
   ];
   const workProcessList = [
     {
       title: "Consultation Meeting",
-      body: "Using high-quality materials and expert techniques, we install your solar system with precision that meet your exact specifications and exceed your expectations.",
+      body: "We review your load, backup expectations, location, and budget so the recommendation starts from real usage, not guesswork.",
     },
     {
       title: "Design and Planning",
-      body: "Using high-quality materials and expert techniques, we install your solar system with precision that meet your exact specifications and exceed your expectations.",
+      body: "We match the inverter, battery bank, solar panels, cables, and protection devices into a practical system design.",
     },
     {
       title: "System Installation",
-      body: "Using high-quality materials and expert techniques, we install your solar system with precision that meet your exact specifications and exceed your expectations.",
+      body: "Our installation approach focuses on neat cable routing, safe protection, solid mounting, and dependable everyday operation.",
     },
     {
       title: "Testing and Commissioning",
-      body: "Using high-quality materials and expert techniques, we install your solar system with precision that meet your exact specifications and exceed your expectations.",
+      body: "We test the system, confirm key operating conditions, and hand over with practical guidance for daily use and maintenance.",
     },
   ];
 
@@ -115,122 +113,78 @@ const AboutPage = () => {
             <div
               className={`text-center md:text-start ${robotoFont.className} md:text-[50px] text-[25px]`}
             >
-              Get your free personlized solar quote today from our experts.
+              Solar power systems designed for real Nigerian loads.
             </div>
             <div
               className={`text-center md:text-start  text-20 mt-0 md:text-[16px] text-[12px] ${robotoFontBodyLight.className} mt-10`}
             >
               <SlideUpComponent>
-                Please fill our quote inquiry form and one of our experts will
-                get in touch with you within 24 hours.
+                TRI-P Tech Limited designs and installs solar systems for homes,
+                offices, shops, schools, churches, and commercial facilities.
               </SlideUpComponent>
             </div>
             <div
               className={`text-center md:text-start  text-20 mt-0 md:text-[16px] text-[12px] ${robotoFontBodyLight.className} mt-10`}
             >
               <SlideUpComponent>
-                Take the first step towards a brighter, cleaner, and more
-                cosr-effectiv e future. Conatct us for free a personalized quote
-                and discover the countless benefits of switching to alternative
-                energy.
+                We use Tier 1 solar panels, practical battery sizing, and
+                proper protection planning so your system performs beyond the
+                numbers on paper.
               </SlideUpComponent>
             </div>
             <div
               className={`text-center md:text-start  text-20 mt-0 md:text-[16px] text-[12px] ${robotoFontBodyLight.className} mt-10`}
             >
               <SlideUpComponent>
-                Connect with our experts to review your solar power needs, cctv
-                system or 3d printing needs either over the phone or in-person.
+                Start with a guided estimate, then let our team review the site
+                conditions and final engineering recommendation.
               </SlideUpComponent>
+            </div>
+            <div className="mt-8 flex justify-center md:justify-start">
+              <a
+                href="/services/solar/calculator"
+                className="rounded-full bg-primary-green px-6 py-4 text-center text-sm font-bold text-white transition hover:bg-dark-green md:text-base"
+              >
+                Estimate your system
+              </a>
             </div>
           </div>
-          {/* form */}
-          {/* <div className="bg-white relative md:p-32 p-8"> */}
-          {/* form-div */}
           <div
-            className="border-2 rounded-lg md:p-20 p-5 md:mt-0 mt-5 absolutes z-10 bg-white md:w-3/5"
-            style={{
-              top: 0,
-              // left: "50%",
-              // transform: "translateX(-50%)",
-            }}
+            className="border-2 rounded-lg md:p-14 p-6 md:mt-0 mt-5 z-10 bg-white md:w-3/5"
           >
-            <form>
-              <div className="flex md:flex-row flex-col w-full justify-between items-center mb-5">
-                <div className="flex flex-col w-full">
-                  <InputComponent
-                    required
-                    placeholder="e.g youremail@gmail.com"
-                    label="Email"
-                    name="email"
-                  />
+            <div className="text-primary-green border-2 rounded-xxl py-2 px-4 inline-flex">
+              TRI-P Tech Solar
+            </div>
+            <h2
+              className={`${robotoFont.className} mt-5 text-primary-dark md:text-[34px] text-[22px] font-bold`}
+            >
+              A complete power solution, not just equipment supply.
+            </h2>
+            <p
+              className={`${robotoFontBodyLight.className} mt-5 text-primary-dark md:text-[17px] text-[14px] leading-7`}
+            >
+              We combine load assessment, Tier 1 solar panels, product
+              selection, protection planning, installation quality, and
+              after-sales support to guarantee exceptional results.
+            </p>
+            <div className="mt-7 grid gap-3">
+              {[
+                "Residential and commercial solar systems",
+                "Battery backup and hybrid inverter solutions",
+                "Tier 1 solar panels with practical protection planning",
+              ].map((item) => (
+                <div key={item} className="flex items-center text-primary-dark">
+                  <IoCheckbox className="mr-3 text-[22px] text-primary-green" />
+                  <span>{item}</span>
                 </div>
-              </div>
-              <div className="flex md:flex-row flex-col w-full justify-between items-center">
-                <div className="flex flex-col w-full">
-                  <InputComponent
-                    required
-                    placeholder="e.g John Doe"
-                    label="Full Name"
-                    name="fullName"
-                  />
-                </div>
-                <div className="flex flex-col w-full md:ml-5 ml-0 mt-3 md:mt-0">
-                  <InputComponent
-                    required
-                    placeholder="Enter phone"
-                    label="Phone number"
-                    name="phone"
-                  />
-                </div>
-              </div>
-              <div className="flex md:flex-row flex-col w-full justify-between items-center mt-5">
-                <div className="flex flex-col w-full md:ml-0 ml-0 mt-3 md:mt-0">
-                  <SelectInputComponent
-                    data={["Residential Solar Installation"]}
-                    required
-                    name="serviceRequired"
-                    label="Service required"
-                    placeholder="Select a service"
-                  />
-                </div>
-                <div className="flex flex-col w-full md:ml-5 ml-0 mt-3 md:mt-0">
-                  <SelectInputComponent
-                    data={[
-                      "12 - 20 Compactments",
-                      "21 - 40 Compactments",
-                      "41 - 60 Compactments",
-                    ]}
-                    required
-                    name="serviceRequired"
-                    label="Number of panels required"
-                    placeholder="Select number of panels"
-                  />
-                </div>
-              </div>
-              <div className="flex flex-row w-full justify-between items-center mt-5">
-                <div className="flex flex-col w-full">
-                  <AreaInputComponent
-                    type="text"
-                    placeholder="Enter more information about the specifics on the service you want a quote on (Optional)."
-                    label="Description"
-                    name="appointmentDetails"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-center w-full">
-                <button
-                  // disabled={mailLoading}
-                  type="submit"
-                  className="bg-custom-blue mt-10 text-center py-4 rounded-full w-full"
-                >
-                  {/* D545A49D */}
-                  {/* {mailLoading ? "Please wait..." : " Submit Request"} */}
-                  Get in touch
-                </button>
-              </div>
-            </form>
+              ))}
+            </div>
+            <a
+              href="/services/solar/calculator"
+              className="mt-8 inline-flex w-full justify-center rounded-full bg-custom-blue py-4 text-center font-bold text-white"
+            >
+              Use the solar calculator
+            </a>
           </div>
         </div>
         {/* hero bottom bar */}
@@ -239,14 +193,14 @@ const AboutPage = () => {
             <div className="md:w-1/4 md:block flex flex-col items-center">
               <IoSnowSharp className="text-[40px] text-primary-dark" />
               <div className="text-primary-dark text-sm md:text-[20px] font-bold text-[10px] md:mt-10 mt-5 md:text-start text-center">
-                5+ Years Material Warranty
+                5+ years material warranty
               </div>
               <div
                 className={`${robotoFontBodyLight.className} text-center md:text-start text-primary-dark  text-[15px] mt-7`}
               >
                 <SlideUpComponent>
-                  We're on a mission to providing reliable power, security
-                  systems as well as parts and products.
+                  Quality components and clear warranty support help protect
+                  the value of your installation.
                 </SlideUpComponent>
               </div>
             </div>
@@ -254,14 +208,14 @@ const AboutPage = () => {
             <div className="md:w-1/4 md:block flex flex-col items-center">
               <IoCallSharp className="text-[40px] text-primary-dark" />
               <div className="text-primary-dark text-sm md:text-[20px] font-bold text-[10px] md:mt-10 mt-5 md:text-start text-center">
-                24/7 Customer Support
+                Responsive customer support
               </div>
               <div
                 className={`${robotoFontBodyLight.className} text-center md:text-start text-primary-dark  text-[15px] mt-7`}
               >
                 <SlideUpComponent>
-                  We're on a mission to providing reliable power, security
-                  systems as well as parts and products.
+                  Our team remains available for guidance, after-installation
+                  support, and technical follow-up.
                 </SlideUpComponent>
               </div>
             </div>
@@ -269,19 +223,48 @@ const AboutPage = () => {
             <div className="md:w-1/4 md:block flex flex-col items-center">
               <IoReceiptSharp className="text-[40px] text-primary-dark" />
               <div className="text-primary-dark text-sm md:text-[20px] font-bold text-[10px] md:mt-10 mt-5 md:text-start text-center">
-                Free Quotation
+                Free quote review
               </div>
               <div
                 className={`${robotoFontBodyLight.className} text-center md:text-start text-primary-dark  text-[15px] mt-7`}
               >
                 <SlideUpComponent>
-                  We're on a mission to providing reliable power, security
-                  systems as well as parts and products.
+                  Get an initial estimate before committing to a full site
+                  inspection or final engineering review.
                 </SlideUpComponent>
               </div>
             </div>
           </div>
         </div>
+
+        {/* calculator callout */}
+        <section className="bg-white px-5 py-14 md:px-20">
+          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 rounded-lg border border-[#d8e7e3] bg-[#f4faf8] p-6 md:flex-row md:items-center md:p-10">
+            <div className="max-w-2xl">
+              <div className="text-sm font-bold uppercase tracking-[0.22em] text-primary-green">
+                Solar estimate tool
+              </div>
+              <h2
+                className={`${robotoFont.className} mt-3 text-primary-dark md:text-[34px] text-[24px] font-bold`}
+              >
+                Estimate your solar system before requesting a final quote.
+              </h2>
+              <p
+                className={`${robotoFontBodyLight.className} mt-4 text-primary-dark md:text-[16px] text-[14px] leading-7`}
+              >
+                Enter your appliances and usage hours, then review the suggested
+                panels, battery bank, inverter, protection items, and estimated
+                equipment cost. Our team will still confirm the final design.
+              </p>
+            </div>
+            <a
+              href="/services/solar/calculator"
+              className="inline-flex rounded-full bg-primary-green px-6 py-4 text-sm font-bold text-white transition hover:bg-dark-green md:text-base"
+            >
+              Use solar calculator
+            </a>
+          </div>
+        </section>
 
         {/* why choose trip tech solar */}
         <div className="bg-light-blue md:px-20 px-5  py-16 flex flex-col items-center">
@@ -291,33 +274,34 @@ const AboutPage = () => {
             >
               <div className="flex flex-row">
                 <div className="text-primary-green border-2 rounded-xxl py-2 px-4">
-                  Why choose Tri-P Tech
+                  Why choose TRI-P Tech
                 </div>
               </div>
               <div
                 className={`${robotoFont.className} md:px-0 px-8 font-bold md:text-start text-center text-primary-dark mt-5 mb-10 md:text-[40px] text-[20px]`}
               >
-                Why choose Tri-P for your solar project
+                Why choose TRI-P for your solar project
               </div>
               <p
                 className={`${robotoFontBody.className} md:text-[18px] text-[15px] md:text-start text-center`}
               >
-                Harnessing the power of the sun is a smart sustainable way to
-                power our homes and yet a universal right
+                We do not size solar systems by guesswork. Every recommendation
+                is built around load behaviour, backup expectations, and
+                practical installation limits.
               </p>
               <p
                 className={`${robotoFontBody.className} md:text-[18px] text-[15px] md:text-start text-center mt-5`}
               >
-                In an era of rising energy costs and growing environmental
-                awareness, solar energy has emerged as a vital solution for
-                sustainable power. At TRI-P Tech, we specialize in providing
-                top-tier solar installation services .
+                At TRI-P Tech Limited, we combine Tier 1 solar panels,
+                dependable inverters, correctly matched batteries, and
+                protection devices that make the installation safer and easier
+                to maintain.
               </p>
               <p
                 className={`${robotoFontBody.className} md:text-[18px] text-[15px] md:text-start text-center mt-5`}
               >
-                Our comprehensive solutions are designed to meet the energy
-                needs of residential, commercial, and industrial clients.
+                Our goal is simple: build solar systems that perform
+                exceptionally well in real daily use.
               </p>
             </div>
             {/* <BounceInComponent> */}
@@ -359,11 +343,11 @@ const AboutPage = () => {
                   <div
                     className={`${robotoFont.className} md:text-[18px] text-[15px]`}
                   >
-                    Save Money on Electicity Bills
+                    Save money on electricity bills
                   </div>
                   <div className="mt-3  md:text-[16px] text-[13px]">
-                    Our solar solutions help clients save on energy costs,
-                    contributing to financial stability and growth
+                    A properly sized solar system can reduce generator use,
+                    lower energy stress, and improve power availability.
                   </div>
                 </div>
               </div>
@@ -403,12 +387,11 @@ const AboutPage = () => {
                   <div
                     className={`${robotoFont.className}  md:text-[18px] text-[15px]`}
                   >
-                    Reserve Energy Production
+                    Reliable backup power
                   </div>
                   <div className="mt-3  md:text-[16px] text-[13px]">
-                    We empower individuals and businesses to achieve energy
-                    independence and resilience free from grid failure and
-                    inefficienceis
+                    We help homes and businesses stay productive during grid
+                    failure, low supply, and unstable power conditions.
                   </div>
                 </div>
               </div>
@@ -451,8 +434,8 @@ const AboutPage = () => {
                     Environmentally Friendly
                   </div>
                   <div className="mt-3  md:text-[16px] text-[13px]">
-                    By promoting the use of renewable energy, we help reduce
-                    carbon emissions and combat climate change.
+                    Solar energy reduces dependence on fuel generators and
+                    supports cleaner everyday power.
                   </div>
                 </div>
               </div>
@@ -464,8 +447,8 @@ const AboutPage = () => {
           <div
             className={`${robotoFont.className} md:px-0 px-0 font-bold md:text-start text-center text-primary-dark mt-5 mb-10 md:text-[45px] text-[20px] w-full`}
           >
-            We follow a strategic approach focused on delivering excellence and
-            reliability
+            We follow a practical engineering approach focused on performance,
+            safety, and exceptional results
           </div>
           <div className="flex flex-row  justify-start">
             {/* image */}
@@ -547,8 +530,9 @@ const AboutPage = () => {
               <div
                 className={` ${robotoFont.className} md:text-[35px] md:text-start text-center self-start md:text-[25px] text-[18px] w-full`}
               >
-                We use the highest quality materials and components to ensure
-                the longevity and efficiency of your solar power system
+                We use Tier 1 solar panels, reliable inverters, strong mounting,
+                and properly matched battery storage to protect system
+                performance.
               </div>
             </div>
 
@@ -567,14 +551,13 @@ const AboutPage = () => {
                         style={{ fontWeight: "bold" }}
                         className={`${robotoFontBody.className} md:text-[15px] text-[10px] text-start text-white text-bold`}
                       >
-                        Sunpower High-Efficiency Solar Panels (750W)
+                        Tier 1 solar panels
                       </div>
                       <p
                         className={`${robotoFontBodyLight.className} md:text-[15px] text-[10px] text-start text-white`}
                       >
-                        Premium-grade panels that offer maximum energy
-                        conversion and durability. Best in class import from
-                        sweden.
+                        High-efficiency panels selected for stronger output,
+                        durability, and long-term system confidence.
                       </p>
                     </div>
                   </div>
@@ -593,13 +576,13 @@ const AboutPage = () => {
                         style={{ fontWeight: "bold" }}
                         className={`${robotoFontBody.className} md:text-[15px] text-[10px] text-start text-white text-bold`}
                       >
-                        AI Integrated Advanced Inverters With External Malpad
+                        Reliable inverter systems
                       </div>
                       <p
                         className={`${robotoFontBodyLight.className} md:text-[15px] text-[10px] text-start text-white`}
                       >
-                        Reliable inverters that optimize the performance of your
-                        solar system.
+                        Inverters are matched to the load, battery voltage, and
+                        expected surge demand.
                       </p>
                     </div>
                   </div>
@@ -619,14 +602,13 @@ const AboutPage = () => {
                         style={{ fontWeight: "bold" }}
                         className={`${robotoFontBody.className} md:text-[15px] text-[10px] text-start text-white text-bold`}
                       >
-                        Robust Mounting Systems (Free Battery Suspenders)
+                        Robust mounting systems
                       </div>
                       <p
                         className={`${robotoFontBodyLight.className} md:text-[15px] text-[10px] text-start text-white`}
                       >
-                        Durable mounting solutions designed to withstand various
-                        environmental conditions. Alongside free battery
-                        suspenders.
+                        Mounting accessories are selected to keep panels secure,
+                        neat, and serviceable.
                       </p>
                     </div>
                   </div>
@@ -650,9 +632,9 @@ const AboutPage = () => {
                       <p
                         className={`${robotoFontBodyLight.className} md:text-[15px] text-[10px] text-start text-white`}
                       >
-                        Expandable 13Wh battery Lithium ion battery with
-                        High-capacity batteries for efficient energy storage and
-                        utilization in winter and any other season.
+                        Expandable lithium battery options sized for backup
+                        time, battery depth of discharge, and daily recharge
+                        expectations.
                       </p>
                     </div>
                   </div>
@@ -673,14 +655,13 @@ const AboutPage = () => {
             <div
               className={`${robotoFont.className} md:px-0 px-8 font-bold md:text-start text-center text-primary-dark mt-5 md:mb-10 mb-5 md:text-[45px] text-[20px] md:w-2/5 w-full`}
             >
-              Seamless & Efficient Customer Experience
+              A clear process from estimate to installation
             </div>
             <div
               className={`${robotoFontBody.className} md:px-0 px-8 font-bold md:text-start text-center text-primary-dark md:mt-5 mb-10 md:text-[20px] text-[15px]  md:w-2/5 w-full md:ml-20 `}
             >
-              Our process is designed to be seamless and efficient, ensuring a
-              smooth experience from start to finish, with or without
-              environmental interferences
+              From the first estimate to final commissioning, we keep the
+              process clear, practical, and focused on a system that works.
             </div>
           </div>
           <div className="flex md:flex-row flex-col  justify-start">
@@ -706,7 +687,6 @@ const AboutPage = () => {
                   className="bg-custom-blue md:mt-10 text-center py-4 rounded-full w-full"
                 >
                   {/* D545A49D */}
-                  {/* {mailLoading ? "Please wait..." : " Submit Request"} */}
                   Speak with Our Engineers
                 </button>
               </div>
@@ -781,14 +761,13 @@ const AboutPage = () => {
             </div>
             <div
               className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[10px] mt-5`}
-            >
-              <SlideUpComponent>
-                Harnessing the power of the sun is a smart sustainable way to
-                power our homes and yet a universal right In an era of rising
-                energy costs and growing environmental awareness, solar energy
-                has emerged as a vital solution for sustainable power and
-                alternative energy supply.
-              </SlideUpComponent>
+              >
+                <SlideUpComponent>
+                TRI-P Tech builds smart and affordable power solutions for
+                homes, offices, and businesses. Our solar and battery systems
+                are planned around real energy needs, practical installation,
+                and reliable everyday backup.
+                </SlideUpComponent>
             </div>
             <div className="flex flex-row md:text-start items-center justify-between md:mt-10 mt-5">
               <div>
@@ -818,16 +797,16 @@ const AboutPage = () => {
               </div>
 
               <div>
-                <div
-                  className={`${robotoFontBody.className} font-[500px] text-primary-green md:text-[55px] text-[25px]`}
-                >
-                  <CountUp target={12} duration={5000} addedString="k KW" />
-                </div>
-                <div
-                  className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[7px] mt-2 w-1/2`}
-                >
-                  Energy Generated
-                </div>
+                  <div
+                    className={`${robotoFontBody.className} font-[500px] text-primary-green md:text-[55px] text-[25px]`}
+                  >
+                  <CountUp target={500} duration={5000} addedString=" kW+" />
+                  </div>
+                  <div
+                    className={`${robotoFontBodyLight.className} text-black md:text-[20px] text-[7px] mt-2 w-1/2`}
+                  >
+                  Solar Capacity Installed
+                  </div>
               </div>
             </div>
           </div>
@@ -844,127 +823,7 @@ const AboutPage = () => {
         </div>
       </main>
 
-      <footer className="bg-primary-dark md:px-28 px-7 py-20 flex md:flex-row flex-col items-center">
-        <div className="md:w-1/3 md:mr-20">
-          <Image
-            style={{ zIndex: 2 }}
-            // layout="responsive"
-            height={100}
-            width={200}
-            alt="Logo"
-            src={"/images/logo/white-logo-text.png"}
-            priority
-          />
-          <div
-            className={`${robotoFontBodyLight.className} text-white md:text-[15px] md:text-[15px] text-[10px] mt-7`}
-          >
-            Experts in CCTV installation, Solar Systemts installation, 3D
-            Printing and Modelling, Prototyping and Design Consultation
-            Services. Contact us anytime to get a free quote.
-          </div>
-          <div className="flex flex-row mt-10">
-            <a
-              className="rounded-full"
-              href={process.env.NEXT_PUBLIC_FACEBOOKPAGE}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <IoLogoFacebook className="text-[50px] rounded-full text-primary-dark bg-white p-3" />
-            </a>
-            <a
-              className="rounded-full ml-8"
-              href={process.env.NEXT_PUBLIC_INSTAGRAM}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <IoLogoInstagram className="text-[50px] rounded-full text-primary-dark bg-white p-3" />
-            </a>
-            <a
-              className="rounded-full ml-8"
-              href={process.env.NEXT_PUBLIC_LINKEDIN}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <IoLogoLinkedin className="text-[50px] rounded-full text-primary-dark bg-white p-3" />
-            </a>
-            <IoLogoWhatsapp className="text-[50px] rounded-full text-primary-dark bg-white p-3 ml-8" />
-            {/* <IoLogoTwitter className="text-[50px] rounded-full text-primary-dark bg-white p-3 ml-8" /> */}
-          </div>
-        </div>
-        <div className="flex flex-row md:mt-0 mt-10">
-          <div>
-            <div className="font-bold">Our Solutions</div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Solar Systems
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Residential Solar
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Commercial Solar
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Battery Storage
-            </div>
-          </div>
-
-          <div className="md:ml-36 ml-5">
-            <div className="font-bold">Our Services</div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Solar Installations
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Design Consultation
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              CCTV Installation
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              3D Printing
-            </div>
-          </div>
-
-          <div className="md:ml-36 ml-5">
-            <div className="font-bold">Company</div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              About Us
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Contact Us
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Latest News
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Live Chat
-            </div>
-          </div>
-        </div>
-      </footer>
+      
     </>
   );
 };

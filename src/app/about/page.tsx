@@ -9,6 +9,7 @@ import {
   robotoFontBodyLight,
 } from "../helpers/fonts";
 import Image from "next/image";
+import Link from "next/link";
 import {
   IoArrowForward,
   IoEarthSharp,
@@ -52,16 +53,16 @@ const AboutPage = () => {
           <div
             className={`text-center ${robotoFont.className} md:text-[55px] text-[25px]`}
           >
-            Tri-P Innovative Tech was born out of a vision to make life more
-            enjoyable, secure and productive.
+            TRI-P Tech Limited builds practical power, security, and product
+            development solutions for homes and businesses.
           </div>
           <div
             className={`text-center text-20 mt-10 md:text-[20px] text-[12px] ${robotoFontBodyLight.className}`}
           >
             <SlideUpComponent>
-              Empowering Africa: Reliable Power, Enhanced Security, Thoughtful
-              Design for Every Home. Transforming lives with cutting-edge
-              solutions tailored to your community&apos;s needs.
+              We combine solar energy systems, CCTV installation, 3D printing,
+              and product design support into solutions that solve real
+              everyday problems.
             </SlideUpComponent>
           </div>
           <div className="text-white-500 flex md:flex-row flex-col md:mt-16 mt-16 flex flex-row justify-center">
@@ -69,13 +70,13 @@ const AboutPage = () => {
               // onClick={handleScrollToServiceSection}
               className="border border-w-4 border-white px-4 py-3 rounded-full bg-white text-custom-blue"
             >
-              Contact Our Team
+              Contact our team
             </button>
             <button
               // onClick={handleScrollToQuotationSection}
               className="md:ml-4 px-4 mt-5 md:mt-0 py-3 border border-w-4 border-custom-blue bg-custom-blue rounded-full"
             >
-              Get a Quotation
+              Get a quote
             </button>
           </div>
         </div>
@@ -89,7 +90,7 @@ const AboutPage = () => {
           <div
             className={`${robotoFont.className} md:px-5 px-8 font-bold md:text-start text-center text-primary-dark mt-5 md:text-[40px] text-[20px]`}
           >
-            Unwaivering Dedication To Powering & Securing
+            Unwavering dedication to powering and securing
           </div>
           <div
             className={`${robotoFont.className} md:px-5 px-8 font-bold md:text-start text-center text-primary-green mb-10 md:text-[40px] text-[20px]`}
@@ -101,23 +102,20 @@ const AboutPage = () => {
               className={`${robotoFontBodyLight.className} md:text-[23px] text-[15px] md:text-start text-center`}
             >
               <SlideUpComponent>
-                The inception of TRI-P is rooted in the collaborative vision of
-                three pioneering minds in Lagos, Nigeria. United by a shared
-                passion for technology and sustainability, they embarked on a
-                mission to revolutionize energy harnessing, home protection, and
-                custom product creation.
+                TRI-P Tech Limited was founded with a clear purpose: to make
+                practical engineering support more accessible for people who
+                need reliable power, stronger security, and useful product
+                development.
               </SlideUpComponent>
             </div>
             <div
               className={`${robotoFontBodyLight.className} md:text-[23px] text-[15px] md:text-start text-center mt-5`}
             >
               <SlideUpComponent>
-                Acknowledging the escalating demand for reliable alternative
-                power solutions, advanced security systems, and the rapidly
-                evolving field of 3D printing, TRI-P was established. Our
-                founders were driven by the ambition to provide high-quality,
-                accessible, and innovative solutions tailored to meet the
-                diverse needs of our community and beyond.
+                As demand grew for dependable backup power, better surveillance,
+                and affordable prototyping, TRI-P Tech focused on building
+                solutions that are practical, serviceable, and designed around
+                real customer needs.
               </SlideUpComponent>
             </div>
           </div>
@@ -132,7 +130,7 @@ const AboutPage = () => {
           <div
             className={`${robotoFont.className} md:px-0 px-5 md:w-3/5 mt-5 font-bold text-center text-primary-dark mb-10 md:text-[40px] text-[20px]`}
           >
-            We Power, Secure & Create 3D Solutions For Households & Offices
+            We power, secure, and create practical solutions for homes and offices
           </div>
 
           {/* indicator */}
@@ -247,15 +245,15 @@ const AboutPage = () => {
                 <div
                   className={`${robotoFont.className} md:px-0 px-8 font-bold md:text-start text-center text-primary-dark mb-5 md:text-[40px] text-[20px]`}
                 >
-                  For Homes & Office Needs
+                  For Home and Office Needs
                 </div>
                 <div
                   className={`${robotoFontBody.className} md:text-[23px] text-[15px] md:text-start text-center text-secondary-gray`}
                 >
                   <SlideUpComponent>
-                    At TRI-P, we are committed to delivering superior solutions
-                    across three primary domains: alternative power, security,
-                    and custom products.
+                    TRI-P Tech Limited designs solar power systems that are
+                    sized around real load behaviour, battery autonomy, and
+                    practical installation limits.
                   </SlideUpComponent>
                 </div>
                 <div
@@ -272,10 +270,9 @@ const AboutPage = () => {
                   className={`${robotoFontBody.className} md:text-[23px] text-[15px] md:text-start text-center text-secondary-gray mt-5`}
                 >
                   <SlideUpComponent>
-                    Our team of experts is dedicated to continuous learning and
-                    adaptation, staying at the forefront of industry trends to
-                    deliver the most innovative and effective solutions
-                    available with the highest quality
+                    We use quality components, including Tier 1 solar panels
+                    where required, and focus on system performance, protection,
+                    and long-term reliability.
                   </SlideUpComponent>
                 </div>
                 <button
@@ -354,9 +351,9 @@ const AboutPage = () => {
                   className={`${robotoFontBody.className} md:text-[23px] text-[15px] md:text-start text-center text-secondary-gray`}
                 >
                   <SlideUpComponent>
-                    At TRI-P, we are committed to delivering top-tier solutions
-                    across three core areas: alternative power, security, and
-                    custom products
+                    TRI-P Tech helps customers move from rough idea to usable
+                    product through practical design, prototyping, and 3D
+                    printing support.
                   </SlideUpComponent>
                 </div>
                 <div
@@ -383,7 +380,7 @@ const AboutPage = () => {
                   // onClick={handleScrollToQuotationSection}
                   className="md:ml-0 px-4 mt-5 md:mt-5 py-3 border border-w-4 border-custom-blue bg-custom-blue rounded-full md:mb-0 mb-10"
                 >
-                  Explore Solar Services
+                  Explore 3D printing
                 </button>
               </div>
             </div>
@@ -455,9 +452,8 @@ const AboutPage = () => {
                   className={`${robotoFontBody.className} md:text-[23px] text-[15px] md:text-start text-center text-secondary-gray`}
                 >
                   <SlideUpComponent>
-                    At TRI-P, we are dedicated to providing high-quality
-                    solutions across three primary domains: alternative power,
-                    security, and custom products.
+                    TRI-P Tech plans CCTV systems around entrances, blind
+                    spots, storage needs, remote viewing, and maintenance.
                   </SlideUpComponent>
                 </div>
                 <div
@@ -473,17 +469,15 @@ const AboutPage = () => {
                   className={`${robotoFontBody.className} md:text-[23px] text-[15px] md:text-start text-center text-secondary-gray mt-5`}
                 >
                   <SlideUpComponent>
-                    Our team of experts stays ahead of industry trends,
-                    continuously refining our approach to ensure we offer the
-                    most innovative, effective, and high-quality security
-                    solutions available.
+                    Security coverage is only useful when camera placement,
+                    storage, access, and support are planned together.
                   </SlideUpComponent>
                 </div>
                 <button
                   // onClick={handleScrollToQuotationSection}
                   className="md:ml-0 px-4 mt-5 md:mt-5 py-3 border border-w-4 border-custom-blue bg-custom-blue rounded-full md:mb-0 mb-10"
                 >
-                  Explore Solar Services
+                  Explore CCTV installation
                 </button>
               </div>
             </div>
@@ -501,16 +495,16 @@ const AboutPage = () => {
             <div
               className={` ${robotoFont.className} md:text-[55px] md:text-start text-center md:self-start self-center text-[25px] md:w-1/3 w-full`}
             >
-              Our Manifesto & Modus Operandi
+              What guides our work
             </div>
             <div className="md:w-1/2 w-full md:ml-16 mt-5">
               <div
                 className={`${robotoFontBody.className} md:text-[23px] text-[15px] md:text-start text-center text-white`}
               >
                 <SlideUpComponent>
-                  We endorse a thoughtful approach to technology that
-                  prioritizes both functionality and aesthetics. We invite you
-                  to join our journey toward an innovative future.
+                  We believe good engineering should be useful, honest, neat,
+                  and built to last. That is the standard we bring to every
+                  project.
                 </SlideUpComponent>
               </div>
             </div>
@@ -536,9 +530,8 @@ const AboutPage = () => {
                     <p
                       className={`${robotoFontBody.className} md:text-[15px] text-[10px] md:text-start text-center text-secondary-gray`}
                     >
-                      We conduct our business with the highest level of
-                      integrity, providing transparent pricing and honest
-                      recommendations
+                      We conduct our work with integrity, clear pricing, and
+                      honest recommendations.
                     </p>
                   </div>
                 </div>
@@ -562,8 +555,8 @@ const AboutPage = () => {
                     <p
                       className={`${robotoFontBody.className} md:text-[15px] text-[10px] md:text-start text-center text-secondary-gray`}
                     >
-                      We prioritize our customers&apos; needs and satisfaction,
-                      ensuring personalized service and support at every step.
+                      We recommend solutions that reduce waste, improve energy
+                      efficiency, and support long-term use.
                     </p>
                   </div>
                 </div>
@@ -614,8 +607,8 @@ const AboutPage = () => {
                     <p
                       className={`${robotoFontBody.className} md:text-[15px] text-[10px] md:text-start text-center text-secondary-gray`}
                     >
-                      We prioritize our customers&apos; needs and satisfaction,
-                      ensuring personalized service and support at every step
+                      We listen first, recommend carefully, and support
+                      customers through the important stages of the project.
                     </p>
                   </div>
                 </div>
@@ -638,8 +631,8 @@ const AboutPage = () => {
             className={`text-center mt-0 text-[15px] md:text-[20px] ${robotoFontBodyLight.className} md:w-1/2 px-5 md:px-0 text-secondary-gray`}
           >
             <SlideUpComponent>
-              We&apos;ve so far worked with over 700 satisfied clients and are
-              still growing with 45 employees nationwide.
+              We&apos;ve so far worked with over 180 satisfied clients and are
+              still growing.
             </SlideUpComponent>
           </div>
           {/* alternative power solutions */}
@@ -649,47 +642,46 @@ const AboutPage = () => {
               <div
                 className={`${robotoFont.className} md:px-0 px-8 font-bold md:text-start text-center text-primary-dark mt-5 mb-0 md:text-[40px] text-[20px] bg-red-0`}
               >
-                Altrernative Power Solutions
+                Alternative Power Solutions
               </div>
               <div
                 className={`${robotoFont.className} md:px-0 px-8 font-bold md:text-start text-center text-primary-green mt-0 mb-5 md:text-[40px] text-[20px]`}
               >
-                For Homes & Office Needs
+                For Home and Office Needs
               </div>
               <div
                 className={` mt-0 md:text-[18px] text-[12px] md:text-start text-center ${robotoFontBody.className} text-secondary-gray md:w-2/3 px-5 md:px-0`}
               >
                 <SlideUpComponent>
-                  Harness the power of the sun with TRI-P TECH&apos;s
-                  cutting-edge power solutions. Our solar panels maximize energy
-                  production, providing a sustainable and cost-effective
-                  alternative to traditional power sources.
+                  Harness the power of the sun with TRI-P Tech&apos;s practical
+                  solar systems. We use quality components and proper sizing to
+                  improve daily power reliability.
                 </SlideUpComponent>
               </div>
               <div className="flex mt-5 md:justify-start justify-center">
                 <div className="text-[30px] font-bold text-primary-green md:w-[120px] w-[110px]">
-                  <CountUp target={40} addedString="K+" />
+                  <CountUp target={500} addedString=" kW+" />
                 </div>
                 <div
                   className={` mt-0 text-20  md:text-[18px] text-[12px] ${robotoFontBody.className} text-secondary-gray w-1/2`}
                 >
                   <b className="font-black text-black">
-                    Solar Panels Installed
+                    Solar arrays installed
                   </b>{" "}
-                  in over 700 homes and offices across Nigeria.
+                  in over 200 homes and offices across Nigeria.
                 </div>
               </div>
               <div className="flex mt-5 md:justify-start justify-center">
                 <div className="text-[30px] font-bold text-primary-green md:w-[120px] w-[110px]">
-                  <CountUp target={300} addedString="K+" />
+                  <CountUp target={1.5} addedString=" MW+" />
                 </div>
                 <div
                   className={` mt-0 text-20 md:text-[18px] text-[12px] ${robotoFontBody.className} text-secondary-gray w-1/2`}
                 >
                   <b className="font-black text-black">
-                    Solar Panels Installed
+                    Battery storage installed
                   </b>{" "}
-                  in over 700 homes and offices across Nigeria.
+                  in over 200 homes and offices across Nigeria.
                 </div>
               </div>
             </div>
@@ -739,7 +731,7 @@ const AboutPage = () => {
                 className={` mt-0 text-[12px] text-center md:text-start md:text-[18px] ${robotoFontBody.className} text-secondary-gray md:w-2/3 w-full md:px-0 px-5`}
               >
                 <SlideUpComponent>
-                  Bring your ideas to life with TRI-P TECH&apos;s 3D printing
+                  Bring your ideas to life with TRI-P Tech&apos;s 3D printing
                   services. We offer a range of custom printing solutions
                   tailored to your specific needs, whether for personal,
                   commercial, or industrial projects.
@@ -756,20 +748,9 @@ const AboutPage = () => {
                   printing and product design
                 </div>
               </div>
-              {/* <div className="flex mt-5">
-              <div className="text-[30px] font-bold text-primary-green  w-[120px]">
-                3k+
-              </div>
-              <div
-                className={` mt-0 text-20 text-[18px] ${robotoFontBody.className} text-secondary-gray w-1/2`}
-              >
-                <b className="font-black text-black">CCTV Camera's Installed</b>{" "}
-                in over 700 offices across Nigeria.
-              </div>
-            </div> */}
             </div>
           </div>
-          {/* Securing andd monitoring */}
+          {/* Securing and monitoring */}
           <div className="flex justify-center items-center w-full bg-red-0 mt-10">
             {/* text part */}
             <div className="md:w-1/2 bg-red-0 md:pl-28 flex flex-col">
@@ -781,14 +762,14 @@ const AboutPage = () => {
               <div
                 className={`${robotoFont.className} md:px-0 px-8 font-bold md:text-start text-center text-primary-green mt-0 mb-5 md:text-[40px] text-[20px]`}
               >
-                Safegaurding Africans
+                Safeguarding Africans
               </div>
               <div
                 className={` mt-0 text-[12px] md:text-[18px] text-center md:text-start ${robotoFontBody.className} text-secondary-gray md:w-2/3 md:px-0 px-5`}
               >
                 <SlideUpComponent>
-                  Ensure the safety and security of your property with TRI-P
-                  TECH&apos;s CCTV installation services. We offer a range of
+                  Improve the safety and security of your property with TRI-P
+                  Tech&apos;s CCTV installation services. We offer a range of
                   surveillance solutions tailored to meet your specific needs,
                   whether for residential, commercial, or industrial use.
                 </SlideUpComponent>
@@ -796,15 +777,15 @@ const AboutPage = () => {
 
               <div className="flex mt-5 md:justify-start justify-center">
                 <div className="text-[30px] font-bold text-primary-green  w-[70px]">
-                  <CountUp target={7} addedString="K+" />
+                  <CountUp target={500} addedString="+" />
                 </div>
                 <div
                   className={` mt-0 text-[12px] md:text-[18px] ${robotoFontBody.className} text-secondary-gray w-1/2`}
                 >
                   <b className="font-black text-black">
-                    CCTV Cameras Installed
+                    CCTV systems installed
                   </b>{" "}
-                  in over 120 homes and offices across Nigeria.
+                  across homes, offices, and business sites.
                 </div>
               </div>
             </div>
@@ -824,127 +805,7 @@ const AboutPage = () => {
           </div>
         </div>
       </main>
-      <footer className="bg-primary-dark md:px-28 px-7 py-20 flex md:flex-row flex-col items-center">
-        <div className="md:w-1/3 md:mr-20">
-          <Image
-            style={{ zIndex: 2 }}
-            // layout="responsive"
-            height={100}
-            width={200}
-            alt="Logo"
-            src={"/images/logo/white-logo-text.png"}
-            priority
-          />
-          <div
-            className={`${robotoFontBodyLight.className} text-white md:text-[15px] md:text-[15px] text-[10px] mt-7`}
-          >
-            Experts in CCTV installation, Solar Systemts installation, 3D
-            Printing and Modelling, Prototyping and Design Consultation
-            Services. Contact us anytime to get a free quote.
-          </div>
-          <div className="flex flex-row mt-10">
-            <a
-              className="rounded-full"
-              href={process.env.NEXT_PUBLIC_FACEBOOKPAGE}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <IoLogoFacebook className="text-[50px] rounded-full text-primary-dark bg-white p-3" />
-            </a>
-            <a
-              className="rounded-full ml-8"
-              href={process.env.NEXT_PUBLIC_INSTAGRAM}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <IoLogoInstagram className="text-[50px] rounded-full text-primary-dark bg-white p-3" />
-            </a>
-            <a
-              className="rounded-full ml-8"
-              href={process.env.NEXT_PUBLIC_LINKEDIN}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <IoLogoLinkedin className="text-[50px] rounded-full text-primary-dark bg-white p-3" />
-            </a>
-            <IoLogoWhatsapp className="text-[50px] rounded-full text-primary-dark bg-white p-3 ml-8" />
-            {/* <IoLogoTwitter className="text-[50px] rounded-full text-primary-dark bg-white p-3 ml-8" /> */}
-          </div>
-        </div>
-        <div className="flex flex-row md:mt-0 mt-10">
-          <div>
-            <div className="font-bold">Our Solutions</div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Solar Systems
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Residential Solar
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Commercial Solar
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Battery Storage
-            </div>
-          </div>
-
-          <div className="md:ml-36 ml-5">
-            <div className="font-bold">Our Services</div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Solar Installations
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Design Consultation
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              CCTV Installation
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              3D Printing
-            </div>
-          </div>
-
-          <div className="md:ml-36 ml-5">
-            <div className="font-bold">Company</div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              About Us
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Contact Us
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Latest News
-            </div>
-            <div
-              className={`${robotoFontBodyLight.className} text-white md:text-[15px] text-[10px] mt-5`}
-            >
-              Live Chat
-            </div>
-          </div>
-        </div>
-      </footer>
+      
     </>
   );
 };

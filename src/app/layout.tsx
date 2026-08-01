@@ -1,14 +1,11 @@
-// "use client";
-// import type { Metadata } from "next";
 import "./globals.css";
 import TopNav from "./components/TopNav";
-import { usePathname } from "next/navigation";
-import { title } from "process";
-import { describe } from "node:test";
+import TriPChatWidget from "./components/TriPChatWidget";
+import PublicFooter from "./components/PublicFooter";
 
 export const metadata = {
-  title: "TRI-P Innovations",
-  describe: "TRI-P Innovation develops and build solar and security systems",
+  title: "TRI-P Tech Limited",
+  description: "TRI-P Tech Limited develops and builds solar, security, and product design systems",
 };
 
 export default function RootLayout({
@@ -22,6 +19,8 @@ export default function RootLayout({
       <body className={`antialiased`}>
         <TopNav />
         {children}
+        <PublicFooter />
+        <TriPChatWidget />
       </body>
     </html>
   );

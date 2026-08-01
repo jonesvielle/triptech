@@ -1,31 +1,10 @@
-// app/api/sendEmail/route.ts
-/* eslint-disable  */
-
-import nodemailer from "nodemailer";
+import { sendMail } from "../_mail";
 
 export async function POST(request: Request) {
-  //   return;
   try {
-    console.log("EMAIL_USER", process.env?.EMAIL_USER);
     const { to, subject, text } = await request.json();
 
-    console.log("in route", {
-      user: process.env?.EMAIL_USER, // Use environment variable
-      pass: process.env?.EMAIL_PASS, // Use environment variable
-    });
-
-    // Configure Nodemailer transporter
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env?.EMAIL_USER, // Use environment variable
-        pass: process.env?.EMAIL_PASS, // Use environment variable
-      },
-    });
-
-    // Send the email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+    await sendMail({
       to,
       subject,
       html: text,
@@ -35,12 +14,12 @@ export async function POST(request: Request) {
       JSON.stringify({ message: "Request sent successfully" }),
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error sending request:", error);
     return new Response(
       JSON.stringify({
         message: "Error sending email",
-        error: error?.message ?? "Unknown error",
+        error: error instanceof Error ? error.message : "Unknown error",
       }),
       { status: 500 }
     );
