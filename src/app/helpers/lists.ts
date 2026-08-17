@@ -1,5 +1,5 @@
 export const servicesList = [
-  "End-To-End Service from submitting requests  to commisioning your project.",
-  "Our Prices are flexible and they mirror our competitive rates ensuring affordability.",
-  "All our panels are manufactured based on  highway traffic standards and certifications.",
+  "End-to-end support, from project request to commissioning.",
+  "Flexible pricing that reflects the project scope and keeps recommendations practical.",
+  "We use tier-one materials and certified components suited to reliable real-world installation.",
 ];
