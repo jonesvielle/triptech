@@ -1911,8 +1911,8 @@ export default function SolarCalculatorApp({ mode = "wizard" }: { mode?: "wizard
                             className={`group relative flex aspect-[16/10] min-w-0 cursor-pointer flex-col justify-center overflow-hidden rounded-xl border p-2 text-center transition duration-200 hover:-translate-y-1 hover:border-[#00d97b] hover:shadow-[0_18px_38px_rgba(0,217,123,0.18)] sm:aspect-[16/9] ${availableWizardProfiles.length > 4 ? "sm:min-h-[88px] sm:p-2.5" : "sm:min-h-[118px] sm:p-3"} ${isSelected ? "border-[#00d97b] bg-[#eafff4] shadow-[0_16px_34px_rgba(0,217,123,0.14)]" : "border-[#d8e7e3] bg-white"}`}
                           >
                             {isSelected ? (
-                              <span className={`absolute grid place-items-center rounded-full bg-[#117865] text-white shadow-[0_10px_22px_rgba(17,120,101,0.24)] ${availableWizardProfiles.length > 4 ? "right-2 top-2 h-5 w-5" : "right-4 top-4 h-8 w-8"}`}>
-                                <IoShieldCheckmarkOutline className={availableWizardProfiles.length > 4 ? "text-sm" : "text-xl"} />
+                              <span className={`absolute grid place-items-center rounded-full bg-[#117865] text-white shadow-[0_10px_22px_rgba(17,120,101,0.24)] right-2 top-2 h-6 w-6 sm:right-3 sm:top-3 sm:h-7 sm:w-7`}>
+                                <IoShieldCheckmarkOutline className="text-base sm:text-lg" />
                               </span>
                             ) : null}
                             <span className={`mx-auto grid place-items-center rounded-full border transition group-hover:border-[#00d97b] group-hover:bg-[#eafff4] ${availableWizardProfiles.length > 4 ? "h-8 w-8 text-base" : "h-10 w-10 text-xl"} ${isSelected ? "border-[#00d97b]/45 bg-[#d8f8ea] text-[#117865]" : "border-[#bddbd4] bg-[#eef7f4] text-[#117865]"}`}>
@@ -2054,8 +2054,8 @@ export default function SolarCalculatorApp({ mode = "wizard" }: { mode?: "wizard
                             className={`group relative flex h-full min-h-0 min-w-0 cursor-pointer flex-col justify-center overflow-hidden rounded-xl border p-2 text-center transition duration-200 hover:-translate-y-1 hover:border-[#00d97b] hover:shadow-[0_18px_38px_rgba(0,217,123,0.18)] sm:p-3 ${isSelected ? "border-[#00d97b] bg-[#eafff4] shadow-[0_16px_34px_rgba(0,217,123,0.14)]" : "border-[#d8e7e3] bg-white"}`}
                           >
                             {isSelected ? (
-                              <span className="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full bg-[#117865] text-white shadow-[0_10px_22px_rgba(17,120,101,0.24)]">
-                                <IoShieldCheckmarkOutline className="text-lg" />
+                              <span className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full bg-[#117865] text-white shadow-[0_10px_22px_rgba(17,120,101,0.24)] sm:right-3 sm:top-3 sm:h-7 sm:w-7">
+                                <IoShieldCheckmarkOutline className="text-base sm:text-lg" />
                               </span>
                             ) : null}
                             <span className={`mx-auto grid h-9 w-9 place-items-center rounded-full border text-lg transition group-hover:border-[#00d97b] group-hover:bg-[#eafff4] sm:h-10 sm:w-10 sm:text-xl ${isSelected ? "border-[#00d97b]/45 bg-[#d8f8ea] text-[#117865]" : "border-[#bddbd4] bg-[#eef7f4] text-[#117865]"}`}>
@@ -2577,3 +2577,4 @@ export default function SolarCalculatorApp({ mode = "wizard" }: { mode?: "wizard
     </div>
   );
 }
+

@@ -372,16 +372,16 @@ export default function Home() {
                   </Carousel>
                 </div>
 
-                <div className="text-white-500 flex md:flex-row flex-col md:mt-16 mt-8 flex flex-row justify-center">
+                <div className="text-white-500 flex flex-col items-center justify-center gap-4 md:mt-16 mt-8 md:flex-row">
                   <button
                     onClick={handleScrollToServiceSection}
-                    className="border border-w-4 border-white px-4 py-3 rounded-full bg-white text-custom-blue"
+                    className="w-full max-w-[340px] border border-white px-5 py-3.5 rounded-full bg-white text-center font-semibold text-custom-blue shadow-[0_12px_28px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 md:w-auto"
                   >
                     Explore Our Services
                   </button>
                   <Link
                     href="/services/solar/calculator"
-                    className="md:ml-4 px-4 mt-5 md:mt-0 py-3 border border-w-4 border-custom-blue bg-custom-blue rounded-full"
+                    className="flex w-full max-w-[340px] items-center justify-center px-5 py-3.5 border border-custom-blue bg-custom-blue text-center font-semibold text-white rounded-full shadow-[0_14px_30px_rgba(0,35,170,0.24)] transition hover:-translate-y-0.5 hover:bg-custom-blue/90 md:w-auto"
                   >
                     Get a quote
                   </Link>
@@ -1127,3 +1127,4 @@ export default function Home() {
     </>
   );
 }
+

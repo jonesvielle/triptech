@@ -41,6 +41,7 @@ import Link from "next/link";
 // interface AboutPageProps {}
 
 const AboutPage = () => {
+  const companyPhone = process.env.NEXT_PUBLIC_COMPANY_PHONE || "2348144952854";
   const [currentIndex, setCurrentIndex] = useState(1);
 
   const handleCarouselNext = () => {
@@ -169,10 +170,10 @@ const AboutPage = () => {
                 <div className="font-bold text-primary-dark">WhatsApp</div>
                 <div className="text-light-gray">Click the link to chat</div>
                 <a
-                  href={`https://wa.me/${process.env.NEXT_PUBLIC_COMPANY_PHONE}`}
+                  href={`https://wa.me/${companyPhone}`}
                   className="text-custom-blue"
                 >
-                  {process.env.NEXT_PUBLIC_COMPANY_PHONE}
+                  {companyPhone}
                 </a>
               </div>
               <IoOpenOutline className="text-custom-blue self-end ml-3 mb-1" />
@@ -200,10 +201,10 @@ const AboutPage = () => {
               <div className="ml-3">
                 <div className="font-bold text-primary-dark">Call</div>
                 <a
-                  href={`tel:${process.env.NEXT_PUBLIC_COMPANY_PHONE}`}
+                  href={`tel:${companyPhone}`}
                   className="text-custom-blue"
                 >
-                  {process.env.NEXT_PUBLIC_COMPANY_PHONE}
+                  {companyPhone}
                 </a>
                 <div className="text-light-gray">
                   Mon-Sun, 8:00 AM - 9:00 PM

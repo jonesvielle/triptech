@@ -81,23 +81,14 @@ export default function PublicFooter() {
           </div>
         </div>
 
-        <div className="grid flex-1 grid-cols-2 gap-8 text-sm md:grid-cols-3">
+        <div className="grid flex-1 grid-cols-2 gap-8 text-sm">
           <div>
-            <h3 className="font-bold">Our Solutions</h3>
+            <h3 className="font-bold">Services</h3>
             <FooterLink href="/services/solar">Solar Systems</FooterLink>
-            <FooterLink href="/services/solar">Residential Solar</FooterLink>
-            <FooterLink href="/services/solar">Commercial Solar</FooterLink>
-            <FooterLink href="/services/solar">Battery Storage</FooterLink>
-          </div>
-
-          <div>
-            <h3 className="font-bold">Our Services</h3>
-            <FooterLink href="/services/solar">Solar Installation</FooterLink>
-            <FooterLink href="/contact">Design Consultation</FooterLink>
             <FooterLink href="/services/cctv-installation">CCTV Installation</FooterLink>
             <FooterLink href="/services/3d-printing">3D Printing</FooterLink>
+            <FooterLink href="/contact">Design Consultation</FooterLink>
           </div>
-
           <div>
             <h3 className="font-bold">Company</h3>
             <FooterLink href="/about">About Us</FooterLink>
@@ -128,3 +119,4 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
     </Link>
   );
 }
+
