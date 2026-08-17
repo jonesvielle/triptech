@@ -1,4 +1,5 @@
 import "./globals.css";
+import Script from "next/script";
 import TopNav from "./components/TopNav";
 import TriPChatWidget from "./components/TriPChatWidget";
 import PublicFooter from "./components/PublicFooter";
@@ -17,6 +18,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased`}>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-TSLHFMKZKK"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-TSLHFMKZKK');
+          `}
+        </Script>
         <TopNav />
         {children}
         <PublicFooter />
