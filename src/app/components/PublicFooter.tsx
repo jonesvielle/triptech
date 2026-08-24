@@ -94,14 +94,6 @@ export default function PublicFooter() {
             <FooterLink href="/about">About Us</FooterLink>
             <FooterLink href="/contact">Contact Us</FooterLink>
             <FooterLink href="/news">Latest News</FooterLink>
-            <a
-              href="https://wa.me/2348144952854"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${robotoFontBodyLight.className} mt-5 block text-white hover:underline`}
-            >
-              Live Chat
-            </a>
           </div>
         </div>
       </div>

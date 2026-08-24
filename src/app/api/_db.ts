@@ -51,7 +51,7 @@ function normalizeProduct(payload: ProductPayload) {
   if (!category) throw new Error("Product category is required.");
   if (!model) throw new Error("Product model is required.");
 
-  return {
+  const product = {
     category,
     manufacturer: String(payload.manufacturer || "Generic").trim() || "Generic",
     model,
@@ -64,8 +64,33 @@ function normalizeProduct(payload: ProductPayload) {
     is_default: Boolean(payload.is_default || payload.isDefault || false),
     meta: payload.meta && typeof payload.meta === "object" ? payload.meta : {},
   };
-}
 
+  if (category === "hybrid-inverter" || category === "non-hybrid-inverter") {
+    if (!Number.isFinite(product.capacity) || product.capacity <= 0) {
+      throw new Error("Continuous output VA is required for inverter products.");
+    }
+    if (!Number.isFinite(product.surge_va) || product.surge_va <= 0) {
+      throw new Error("Surge / peak output VA is required for inverter products.");
+    }
+    if (product.surge_va < product.capacity) {
+      throw new Error("Inverter surge rating should be equal to or higher than continuous output VA.");
+    }
+    if (![12, 24, 48].includes(product.voltage)) {
+      throw new Error("Inverter voltage must be 12V, 24V, or 48V.");
+    }
+  }
+
+  if (category === "hybrid-inverter") {
+    if (!Number.isFinite(product.hybrid_pv_current_a) || product.hybrid_pv_current_a <= 0) {
+      throw new Error("Hybrid PV input current limit is required for hybrid inverters.");
+    }
+    if (product.hybrid_pv_current_a > 500) {
+      throw new Error("Hybrid PV current looks too high. Enter amps from the datasheet, not PV watts.");
+    }
+  }
+
+  return product;
+}
 function rowToProduct(row: Record<string, unknown>) {
   return {
     ...row,

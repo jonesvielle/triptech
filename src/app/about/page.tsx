@@ -11,6 +11,11 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import {
+  TbCube3dSphere,
+  TbDeviceCctv,
+  TbSolarPanel,
+} from "react-icons/tb";
+import {
   IoArrowForward,
   IoEarthSharp,
   IoGlobeSharp,
@@ -48,7 +53,7 @@ const AboutPage = () => {
           progressStyle={{ backgroundColor: "#117865" }}
         />
         {/* hero */}
-        <div className="landing-about flex flex-col w-full md:pt-60 pt-40 md:px-60 px-5">
+        <div className="landing-about flex flex-col w-full md:pt-60 pt-40 md:px-60 px-5 md:pb-24 pb-16">
           <div className="color-overlay"></div>
           <div
             className={`text-center ${robotoFont.className} md:text-[55px] text-[25px]`}
@@ -65,19 +70,19 @@ const AboutPage = () => {
               everyday problems.
             </SlideUpComponent>
           </div>
-          <div className="text-white-500 flex md:flex-row flex-col md:mt-16 mt-16 flex flex-row justify-center">
-            <button
-              // onClick={handleScrollToServiceSection}
-              className="border border-w-4 border-white px-4 py-3 rounded-full bg-white text-custom-blue"
+          <div className="text-white-500 mt-16 flex flex-col items-center justify-center gap-4 md:flex-row">
+            <Link
+              href="/contact"
+              className="flex min-h-[48px] w-full max-w-[280px] items-center justify-center rounded-full border border-white bg-white px-6 py-3 text-center font-semibold text-custom-blue transition duration-200 hover:-translate-y-0.5 hover:shadow-lg md:w-auto"
             >
               Contact our team
-            </button>
-            <button
-              // onClick={handleScrollToQuotationSection}
-              className="md:ml-4 px-4 mt-5 md:mt-0 py-3 border border-w-4 border-custom-blue bg-custom-blue rounded-full"
+            </Link>
+            <Link
+              href="/services/solar/calculator"
+              className="flex min-h-[48px] w-full max-w-[280px] items-center justify-center rounded-full border border-custom-blue bg-custom-blue px-6 py-3 text-center font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-lg md:w-auto"
             >
               Get a quote
-            </button>
+            </Link>
           </div>
         </div>
         {/* our story */}
@@ -275,12 +280,12 @@ const AboutPage = () => {
                     and long-term reliability.
                   </SlideUpComponent>
                 </div>
-                <button
-                  // onClick={handleScrollToQuotationSection}
-                  className="md:ml-0 px-4 mt-5 md:mt-5 py-3 border border-w-4 border-custom-blue bg-custom-blue rounded-full md:mb-0 mb-10"
+                <Link
+                  href="/services/solar"
+                  className="mx-auto mt-5 mb-10 flex min-h-[50px] w-full max-w-[360px] items-center justify-center rounded-full border border-custom-blue bg-custom-blue px-6 py-3 text-center font-semibold text-white md:mx-0 md:mb-0 md:mt-5 md:w-fit"
                 >
                   Explore Solar Services
-                </button>
+                </Link>
               </div>
             </div>
           )}
@@ -376,12 +381,12 @@ const AboutPage = () => {
                     available.
                   </SlideUpComponent>
                 </div>
-                <button
-                  // onClick={handleScrollToQuotationSection}
-                  className="md:ml-0 px-4 mt-5 md:mt-5 py-3 border border-w-4 border-custom-blue bg-custom-blue rounded-full md:mb-0 mb-10"
+                <Link
+                  href="/services/3d-printing"
+                  className="mx-auto mt-5 mb-10 flex min-h-[50px] w-full max-w-[360px] items-center justify-center rounded-full border border-custom-blue bg-custom-blue px-6 py-3 text-center font-semibold text-white md:mx-0 md:mb-0 md:mt-5 md:w-fit"
                 >
                   Explore 3D printing
-                </button>
+                </Link>
               </div>
             </div>
           )}
@@ -473,12 +478,12 @@ const AboutPage = () => {
                     storage, access, and support are planned together.
                   </SlideUpComponent>
                 </div>
-                <button
-                  // onClick={handleScrollToQuotationSection}
-                  className="md:ml-0 px-4 mt-5 md:mt-5 py-3 border border-w-4 border-custom-blue bg-custom-blue rounded-full md:mb-0 mb-10"
+                <Link
+                  href="/services/cctv-installation"
+                  className="mx-auto mt-5 mb-10 flex min-h-[50px] w-full max-w-[360px] items-center justify-center rounded-full border border-custom-blue bg-custom-blue px-6 py-3 text-center font-semibold text-white md:mx-0 md:mb-0 md:mt-5 md:w-fit"
                 >
                   Explore CCTV installation
-                </button>
+                </Link>
               </div>
             </div>
           )}
@@ -635,8 +640,120 @@ const AboutPage = () => {
               still growing.
             </SlideUpComponent>
           </div>
+          <div className="md:hidden w-full px-5 mt-10 space-y-5">
+            <div className="overflow-hidden rounded-lg border border-primary-green/20 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+              <div className="relative h-[190px] w-full">
+                <Image
+                  className="object-cover"
+                  fill
+                  alt="Solar panels installed on a roof"
+                  src="/images/solar-array.jpg"
+                  sizes="100vw"
+                />
+              </div>
+              <div className="p-5">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#e8f7f3] text-primary-green">
+                    <TbSolarPanel className="h-7 w-7" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <h3 className={`${robotoFont.className} text-[22px] font-bold leading-tight text-primary-dark`}>
+                      Alternative Power Solutions
+                    </h3>
+                    <p className={`${robotoFontBody.className} mt-2 text-[14px] leading-6 text-secondary-gray`}>
+                      We design and install practical solar systems that support homes, businesses, and essential daily power needs.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[#dce9e6] pt-4">
+                  <div className="rounded-lg bg-[#f2fbf8] p-3">
+                    <div className="text-[24px] font-bold text-primary-green"><CountUp target={500} addedString=" kW+" /></div>
+                    <div className={`${robotoFontBody.className} text-[12px] text-secondary-gray`}>installed</div>
+                  </div>
+                  <div className="rounded-lg bg-[#f2fbf8] p-3">
+                    <div className="text-[15px] font-bold text-primary-dark">Homes & offices</div>
+                    <div className={`${robotoFontBody.className} text-[12px] text-secondary-gray`}>supported</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-lg border border-primary-green/20 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+              <div className="relative h-[190px] w-full">
+                <Image
+                  className="object-cover"
+                  fill
+                  alt="3D printer producing a prototype"
+                  src="/images/print-house.jpg"
+                  sizes="100vw"
+                />
+              </div>
+              <div className="p-5">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#e8f7f3] text-primary-green">
+                    <TbCube3dSphere className="h-7 w-7" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <h3 className={`${robotoFont.className} text-[22px] font-bold leading-tight text-primary-dark`}>
+                      Bringing Innovative Design Concepts to Life
+                    </h3>
+                    <p className={`${robotoFontBody.className} mt-2 text-[14px] leading-6 text-secondary-gray`}>
+                      We help turn ideas, sketches, and prototypes into usable parts and product-ready components.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[#dce9e6] pt-4">
+                  <div className="rounded-lg bg-[#f2fbf8] p-3">
+                    <div className="text-[24px] font-bold text-primary-green"><CountUp target={3} addedString="K+" /></div>
+                    <div className={`${robotoFontBody.className} text-[12px] text-secondary-gray`}>models designed</div>
+                  </div>
+                  <div className="rounded-lg bg-[#f2fbf8] p-3">
+                    <div className="text-[15px] font-bold text-primary-dark">Prototype</div>
+                    <div className={`${robotoFontBody.className} text-[12px] text-secondary-gray`}>to product support</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-lg border border-primary-green/20 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+              <div className="relative h-[190px] w-full">
+                <Image
+                  className="object-cover"
+                  fill
+                  alt="CCTV camera mounted for security monitoring"
+                  src="/images/cctv.jpg"
+                  sizes="100vw"
+                />
+              </div>
+              <div className="p-5">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#e8f7f3] text-primary-green">
+                    <TbDeviceCctv className="h-7 w-7" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <h3 className={`${robotoFont.className} text-[22px] font-bold leading-tight text-primary-dark`}>
+                      Securing, Monitoring & Safeguarding Spaces
+                    </h3>
+                    <p className={`${robotoFontBody.className} mt-2 text-[14px] leading-6 text-secondary-gray`}>
+                      We install CCTV systems and monitoring setups for homes, offices, and business environments.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-5 grid grid-cols-2 gap-3 border-t border-[#dce9e6] pt-4">
+                  <div className="rounded-lg bg-[#f2fbf8] p-3">
+                    <div className="text-[24px] font-bold text-primary-green"><CountUp target={500} addedString="+" /></div>
+                    <div className={`${robotoFontBody.className} text-[12px] text-secondary-gray`}>systems installed</div>
+                  </div>
+                  <div className="rounded-lg bg-[#f2fbf8] p-3">
+                    <div className="text-[15px] font-bold text-primary-dark">Homes & offices</div>
+                    <div className={`${robotoFontBody.className} text-[12px] text-secondary-gray`}>secured</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           {/* alternative power solutions */}
-          <div className="flex justify-center items-center w-full bg-blue-00">
+          <div className="hidden md:flex justify-center items-center w-full bg-blue-00">
             {/* text part */}
             <div className="md:w-1/2 md:pl-28 pl-0 flex flex-col   bg-red-00">
               <div
@@ -700,7 +817,7 @@ const AboutPage = () => {
             </div>
           </div>
           {/* bringing innovative design concept to life */}
-          <div className="flex justify-center items-center w-full bg-red-0 mt-10">
+          <div className="hidden md:flex justify-center items-center w-full bg-red-0 mt-10">
             {/* image part */}
             <div className="md:w-1/2 bg-yellow-0 pl-28 md:block hidden">
               <div className="w-[450px] h-[400px] relative ml-5 md:flex mt-10 hidden ml-26 self-center">
@@ -751,7 +868,7 @@ const AboutPage = () => {
             </div>
           </div>
           {/* Securing and monitoring */}
-          <div className="flex justify-center items-center w-full bg-red-0 mt-10">
+          <div className="hidden md:flex justify-center items-center w-full bg-red-0 mt-10">
             {/* text part */}
             <div className="md:w-1/2 bg-red-0 md:pl-28 flex flex-col">
               <div

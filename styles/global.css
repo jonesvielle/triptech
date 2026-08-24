@@ -64,7 +64,7 @@
 }
 
 .impeccable {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+  background-image: linear-gradient(rgba(3, 13, 24, 0.7), rgba(3, 13, 24, 0.7)),
     url("/images/heropanel.jpg");
   background-repeat: no-repeat;
   background-size: cover;

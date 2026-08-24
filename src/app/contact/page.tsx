@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState } from "react";
 import "react-toastify/dist/ReactToastify.css"; // Import styles
 import "../../../styles/global.css";
@@ -13,7 +13,6 @@ import {
   IoArrowForward,
   IoCalendar,
   IoCall,
-  IoCheckbox,
   IoEarthSharp,
   IoExitOutline,
   IoGlobeSharp,
@@ -42,14 +41,78 @@ import Link from "next/link";
 
 const AboutPage = () => {
   const companyPhone = process.env.NEXT_PUBLIC_COMPANY_PHONE || "2348144952854";
-  const [currentIndex, setCurrentIndex] = useState(1);
+  const [contactForm, setContactForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [contactStatus, setContactStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [contactFeedback, setContactFeedback] = useState("");
 
-  const handleCarouselNext = () => {
-    if (currentIndex === 3) {
-      setCurrentIndex(1);
+  const handleContactChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target;
+    setContactForm((current) => ({ ...current, [name]: value }));
+    if (contactStatus !== "idle") {
+      setContactStatus("idle");
+      setContactFeedback("");
+    }
+  };
+
+  const handleContactSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const clientName = `${contactForm.firstName} ${contactForm.lastName}`.trim();
+    const email = contactForm.email.trim();
+    const phone = contactForm.phone.trim();
+    const message = contactForm.message.trim();
+
+    if (!clientName || !email || !phone || !message) {
+      setContactStatus("error");
+      setContactFeedback("Please fill in your name, email, phone number, and message.");
       return;
     }
-    setCurrentIndex((prevIndex) => prevIndex + 1);
+
+    setContactStatus("sending");
+    setContactFeedback("");
+
+    try {
+      const response = await fetch("/api/quote-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_name: clientName,
+          email,
+          phone,
+          location: "Contact page",
+          site_note: message,
+          total_cost: 0,
+          daily_energy_wh: 0,
+          system_voltage: 0,
+          quote: {
+            requestType: "contact",
+            source: "contact-page",
+            firstName: contactForm.firstName.trim(),
+            lastName: contactForm.lastName.trim(),
+            message,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Contact request failed.");
+      }
+
+      setContactStatus("success");
+      setContactFeedback("Message received. TRI-P Tech will follow up shortly.");
+      setContactForm({ firstName: "", lastName: "", email: "", phone: "", message: "" });
+    } catch (error) {
+      setContactStatus("error");
+      setContactFeedback("Could not send your message. Please try again or use WhatsApp.");
+    }
   };
 
   return (
@@ -90,14 +153,16 @@ const AboutPage = () => {
               // transform: "translateX(-50%)",
             }}
           >
-            <form>
+            <form onSubmit={handleContactSubmit}>
               <div className="flex md:flex-row flex-col w-full justify-between items-center">
                 <div className="flex flex-col w-full">
                   <InputComponent
                     required
                     placeholder="e.g Jones"
                     label="First name"
-                    name="fullName"
+                    name="firstName"
+                    value={contactForm.firstName}
+                    onChange={handleContactChange}
                   />
                 </div>
                 <div className="flex flex-col w-full md:ml-5 ml-0 mt-3 md:mt-0">
@@ -106,6 +171,8 @@ const AboutPage = () => {
                     placeholder="e.g Nathan"
                     label="Last name"
                     name="lastName"
+                    value={contactForm.lastName}
+                    onChange={handleContactChange}
                   />
                 </div>
               </div>
@@ -117,6 +184,8 @@ const AboutPage = () => {
                     placeholder="Enter email address"
                     label="Email address"
                     name="email"
+                    value={contactForm.email}
+                    onChange={handleContactChange}
                   />
                 </div>
                 <div className="flex flex-col w-full md:ml-5 ml-0 mt-3 md:mt-0">
@@ -125,6 +194,8 @@ const AboutPage = () => {
                     placeholder="Enter phone"
                     label="Phone number"
                     name="phone"
+                    value={contactForm.phone}
+                    onChange={handleContactChange}
                   />
                 </div>
               </div>
@@ -135,29 +206,37 @@ const AboutPage = () => {
                     type="text"
                     placeholder="Tell us what you need help with. Include the project type, location, and any important details."
                     label="Message to our team"
-                    name="appointmentDetails"
+                    name="message"
+                    value={contactForm.message}
+                    onChange={handleContactChange}
                   />
-                </div>
-              </div>
-
-              <div className="flex flex-row justify-center mt-5">
-                <IoCheckbox color={"#117865"} className="mt-1" size={22} />
-                <div className="ml-2 text-primary-dark">
-                  Subscribe to TRI-P Tech updates for project news, service
-                  announcements, useful guides, and product information.
                 </div>
               </div>
 
               <div className="flex justify-center">
                 <button
-                  // disabled={mailLoading}
+                  disabled={contactStatus === "sending"}
                   type="submit"
-                  className="bg-custom-blue mt-10 text-center py-4 rounded-full md:w-1/3 w-full"
+                  className={`mt-10 flex min-h-[54px] items-center justify-center rounded-full bg-custom-blue px-6 py-4 text-center font-semibold text-white transition md:w-1/3 w-full ${
+                    contactStatus === "sending" ? "cursor-wait opacity-80" : "hover:shadow-lg"
+                  }`}
                 >
-                  {/* D545A49D */}
-                  Get in touch
+                  {contactStatus === "sending"
+                    ? "Sending..."
+                    : contactStatus === "success"
+                    ? "Message received"
+                    : "Get in touch"}
                 </button>
               </div>
+              {contactFeedback ? (
+                <p
+                  className={`mt-4 text-center text-sm font-semibold ${
+                    contactStatus === "error" ? "text-red-600" : "text-[#117865]"
+                  }`}
+                >
+                  {contactFeedback}
+                </p>
+              ) : null}
             </form>
           </div>
           {/* contacts */}
@@ -237,3 +316,5 @@ const AboutPage = () => {
 };
 
 export default AboutPage;
+
+

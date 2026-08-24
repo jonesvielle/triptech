@@ -189,7 +189,7 @@ const AboutPage = () => {
         </div>
         {/* hero bottom bar */}
         <div className="md:px-40 px-20 pb-10 flex flex-col bg-white items-center">
-          <div className="flex md:flex-row flex-col md:justify-between items-center md:items-start md:mt-10 mt-8">
+          <div className="flex md:flex-row flex-col md:justify-between items-center md:items-start md:mt-10 mt-8 gap-14 md:gap-0">
             <div className="md:w-1/4 md:block flex flex-col items-center">
               <IoSnowSharp className="text-[40px] text-primary-dark" />
               <div className="text-primary-dark text-sm md:text-[20px] font-bold text-[10px] md:mt-10 mt-5 md:text-start text-center">
@@ -259,7 +259,7 @@ const AboutPage = () => {
             </div>
             <a
               href="/services/solar/calculator"
-              className="inline-flex rounded-full bg-primary-green px-6 py-4 text-sm font-bold text-white transition hover:bg-dark-green md:text-base"
+              className="inline-flex self-center rounded-full bg-primary-green px-6 py-4 text-center text-sm font-bold text-white transition hover:bg-dark-green md:self-auto md:text-base"
             >
               Use solar calculator
             </a>
@@ -681,14 +681,12 @@ const AboutPage = () => {
                 </div>
               </BounceInComponent>
               <div className="flex justify-center w-full">
-                <button
-                  // disabled={mailLoading}
-                  type="submit"
-                  className="bg-custom-blue md:mt-10 text-center py-4 rounded-full w-full"
+                <a
+                  href="/contact"
+                  className="inline-flex w-full items-center justify-center rounded-full bg-custom-blue py-4 text-center text-white md:mt-10"
                 >
-                  {/* D545A49D */}
                   Speak with Our Engineers
-                </button>
+                </a>
               </div>
             </div>
             {/* text */}
