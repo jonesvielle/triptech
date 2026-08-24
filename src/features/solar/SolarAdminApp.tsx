@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { defaultCatalogue } from "./defaults";
 import { formatNaira } from "./format";
 
@@ -44,6 +44,10 @@ type QuoteRequest = {
   created_at: string;
   quote?: {
     requestType?: string;
+    source?: string;
+    message?: string;
+    firstName?: string;
+    lastName?: string;
     propertyType?: string;
     cameraCount?: number;
     entryPoints?: number;
@@ -88,6 +92,7 @@ export type SolarAdminSection = "dashboard" | "requests" | "messages" | "team" |
 type RequestPriorityFilter = "all" | "open" | "overdue" | "due-soon" | "high-value" | "unassigned";
 type ContactAction = "call" | "whatsapp" | "email" | "reply" | "site-visit";
 type TrendRange = 7 | 14 | 30 | 90;
+type DashboardGraphMetric = "value" | "requests" | "average";
 type CatalogueHealthFilter = "all" | "default" | "missing-price" | "missing-capacity" | "missing-voltage";
 type TeamRole = "Admin" | "Sales" | "Engineer" | "Viewer";
 type NewsStatus = "draft" | "published";
@@ -164,6 +169,7 @@ type SolarAdminAppProps = {
     email: string;
     role: TeamRole;
   };
+  onOpenMobileMenu?: () => void;
 };
 
 const quoteStatuses = [
@@ -381,11 +387,69 @@ function rowPrice(product: DbProduct) {
 }
 
 function productFieldApplies(category: string, key: keyof ProductForm) {
-  if (["manufacturer", "model", "capacity_label", "capacity", "price", "is_default"].includes(String(key))) return true;
+  if (["manufacturer", "model", "capacity_label", "price", "is_default"].includes(String(key))) return true;
+  if (key === "capacity") return ["panel", "battery", "hybrid-inverter", "non-hybrid-inverter", "controller"].includes(category);
   if (key === "voltage") return ["battery", "hybrid-inverter", "non-hybrid-inverter", "knife-switch"].includes(category);
   if (key === "surge_va") return category.includes("inverter");
   if (key === "hybrid_pv_current_a") return category === "hybrid-inverter";
   return false;
+}
+
+function isRequiredProductField(category: string, key: keyof ProductForm) {
+  if (["manufacturer", "model", "price"].includes(String(key))) return true;
+  if (key === "capacity") return productFieldApplies(category, key);
+  if (key === "voltage") return ["battery", "hybrid-inverter", "non-hybrid-inverter"].includes(category);
+  if (key === "surge_va") return category.includes("inverter");
+  if (key === "hybrid_pv_current_a") return category === "hybrid-inverter";
+  return false;
+}
+
+function productFieldLabel(category: string, key: keyof ProductForm, fallback: string) {
+  if (key === "capacity") {
+    if (category === "panel") return "Panel wattage (W)";
+    if (category === "battery") return "Battery capacity (Wh)";
+    if (category.includes("inverter")) return "Continuous output (VA)";
+    if (category === "controller") return "Controller current rating (A)";
+    return "Capacity / rating";
+  }
+  if (key === "capacity_label") return "Display label";
+  if (key === "voltage") {
+    if (category === "knife-switch") return "Switch poles";
+    return "System voltage (V)";
+  }
+  if (key === "surge_va") {
+    if (category === "non-hybrid-inverter") return "Non-hybrid inverter surge / peak output (VA)";
+    if (category === "hybrid-inverter") return "Hybrid inverter surge / peak output (VA)";
+    return "Surge / peak output (VA)";
+  }
+  if (key === "hybrid_pv_current_a") return "Hybrid PV input current limit (A)";
+  return fallback;
+}
+
+function productFieldHelp(category: string, key: keyof ProductForm) {
+  if (key === "manufacturer") return "Enter the product brand or supplier name. Duplicate checks are done within the same brand.";
+  if (key === "model") return "Enter the exact model or catalogue name admins will recognize later.";
+  if (key === "price") return "Enter current catalogue price in naira. Do not add commas or currency symbols.";
+  if (key === "capacity") {
+    if (category === "panel") return "Example: 550 for a 550W panel.";
+    if (category === "battery") return "Enter usable catalogue size in Wh, for example 5000 for 5kWh.";
+    if (category.includes("inverter")) return "Enter the inverter continuous VA rating, not kVA text.";
+    if (category === "controller") return "Example: 60 for a 60A charge controller.";
+  }
+  if (key === "capacity_label") return "What admins/users see, for example 5kVA 48V hybrid.";
+  if (key === "voltage" && category.includes("inverter")) return "Use the inverter DC battery voltage: 12, 24, or 48.";
+  if (key === "voltage" && category === "battery") return "Use the battery bank voltage: 12, 24, or 48.";
+  if (key === "surge_va") {
+    if (category === "non-hybrid-inverter") return "Enter the non-hybrid inverter startup/peak VA from its datasheet. It must be equal to or higher than continuous output.";
+    if (category === "hybrid-inverter") return "Enter the hybrid inverter startup/peak VA from its datasheet. It must be equal to or higher than continuous output.";
+    return "Enter the inverter startup/peak VA. It should not be lower than continuous VA.";
+  }
+  if (key === "hybrid_pv_current_a") return "Enter PV input current in amps from the hybrid inverter datasheet. Do not enter PV watts here.";
+  return "";
+}
+
+function isPositiveNumber(value: unknown) {
+  return Number.isFinite(Number(value)) && Number(value) > 0;
 }
 
 function productPayload(form: ProductForm) {
@@ -396,7 +460,7 @@ function productPayload(form: ProductForm) {
     manufacturer: form.manufacturer.trim() || "Generic",
     model: form.model.trim(),
     capacity_label: form.capacity_label.trim() || form.model.trim(),
-    capacity: Number(form.capacity || 0),
+    capacity: productFieldApplies(category, "capacity") ? Number(form.capacity || 0) : 0,
     voltage: productFieldApplies(category, "voltage") ? Number(form.voltage || 0) : 0,
     price: Number(form.price || 0),
     surge_va: productFieldApplies(category, "surge_va") ? Number(form.surge_va || 0) : 0,
@@ -406,20 +470,48 @@ function productPayload(form: ProductForm) {
 
 function validateProductPayload(payload: ProductForm) {
   if (!payload.model.trim()) return "Enter product model/name.";
-  if (!Number(payload.capacity || 0)) return "Enter a valid capacity.";
-  if (Number(payload.price || 0) <= 0) return "Enter a valid price.";
-  if (["battery", "hybrid-inverter", "non-hybrid-inverter"].includes(payload.category) && !Number(payload.voltage || 0)) {
-    return "Voltage is required for batteries and inverters.";
+  if (productFieldApplies(payload.category, "capacity") && !isPositiveNumber(payload.capacity)) return "Enter a valid capacity/rating above 0.";
+  if (!isPositiveNumber(payload.price)) return "Enter a valid price above 0.";
+  if (["battery", "hybrid-inverter", "non-hybrid-inverter"].includes(payload.category)) {
+    const voltage = Number(payload.voltage || 0);
+    if (!voltage) return "Voltage is required for batteries and inverters.";
+    if (![12, 24, 48].includes(voltage)) return "Battery and inverter voltage must be 12V, 24V, or 48V.";
   }
-  if (payload.category.includes("inverter") && !Number(payload.surge_va || 0)) {
-    return "Surge VA is required for inverter products.";
+  if (payload.category.includes("inverter")) {
+    const continuousVa = Number(payload.capacity || 0);
+    const surgeVa = Number(payload.surge_va || 0);
+    const inverterName = payload.category === "non-hybrid-inverter" ? "Non-hybrid inverter" : "Hybrid inverter";
+    if (!isPositiveNumber(surgeVa)) return `${inverterName} surge / peak output VA is required.`;
+    if (surgeVa < continuousVa) return `${inverterName} surge rating should be equal to or higher than continuous output VA.`;
   }
-  if (payload.category === "hybrid-inverter" && !Number(payload.hybrid_pv_current_a || 0)) {
-    return "Hybrid PV current rating is required for hybrid inverters.";
+  if (payload.category === "hybrid-inverter") {
+    const hybridPvCurrent = Number(payload.hybrid_pv_current_a || 0);
+    if (!isPositiveNumber(hybridPvCurrent)) return "Hybrid PV input current limit is required for hybrid inverters.";
+    if (hybridPvCurrent > 500) return "Hybrid PV current looks too high. Enter amps from the datasheet, not PV watts.";
   }
   return "";
 }
 
+function catalogueStatusClass(status: string) {
+  const lowerStatus = status.toLowerCase();
+  const isError = lowerStatus.includes("cannot") || lowerStatus.includes("required") || lowerStatus.includes("valid") || lowerStatus.includes("higher") || lowerStatus.includes("too high") || lowerStatus.includes("duplicate") || lowerStatus.includes("only admin") || lowerStatus.includes("could not") || lowerStatus.includes("enter ");
+  return isError
+    ? "border-[#f0b4b4] bg-[#fff6f6] text-[#9b1c1c]"
+    : "border-[#b7ead8] bg-[#f1fff8] text-[#117865]";
+}
+
+function catalogueStatusTextClass(status: string) {
+  return catalogueStatusClass(status).includes("#9b1c1c") ? "text-[#9b1c1c]" : "text-[#117865]";
+}
+
+async function apiErrorMessage(response: Response, fallback: string) {
+  try {
+    const data = await response.json();
+    return typeof data?.error === "string" && data.error.trim() ? data.error : fallback;
+  } catch {
+    return fallback;
+  }
+}
 function formatDate(value: string) {
   if (!value) return "Not available";
   const date = new Date(value);
@@ -465,12 +557,59 @@ function quoteStatusClass(status?: string) {
   }
 }
 
-function quoteRecommendation(quote: QuoteRequest) {
+type QuoteRecommendation = NonNullable<NonNullable<QuoteRequest["quote"]>["recommendation"]>;
+
+function quoteRecommendation(quote: QuoteRequest): Partial<QuoteRecommendation> {
   return quote.quote?.recommendation || {};
 }
 
+function quoteRequestTypeKey(quote: QuoteRequest) {
+  return String(quote.quote?.requestType || "Solar").trim().toLowerCase();
+}
+
 function quoteRequestType(quote: QuoteRequest) {
-  return String(quote.quote?.requestType || "Solar").trim() || "Solar";
+  const type = quoteRequestTypeKey(quote);
+  if (type === "cctv") return "CCTV";
+  if (type === "contact" || type === "general") return "General enquiry";
+  return "Solar";
+}
+
+function isGeneralEnquiry(quote: QuoteRequest) {
+  const type = quoteRequestTypeKey(quote);
+  return type === "contact" || type === "general";
+}
+
+function quoteMessage(quote: QuoteRequest) {
+  return quote.site_note || quote.quote?.message || "Not provided";
+}
+
+function quoteOverviewMetrics(quote: QuoteRequest, recommendation: Partial<QuoteRecommendation>): [string, string][] {
+  const type = quoteRequestTypeKey(quote);
+
+  if (isGeneralEnquiry(quote)) {
+    return [
+      ["Request", "General enquiry"],
+      ["Source", quote.quote?.source || quote.location || "Contact page"],
+      ["Message", quoteMessage(quote)],
+      ["Follow-up", quote.follow_up_date ? formatShortDate(quote.follow_up_date) : "Not scheduled"],
+    ];
+  }
+
+  if (type === "cctv") {
+    return [
+      ["Cameras", `${quote.quote?.cameraCount || 0}`],
+      ["Entry/exit", `${quote.quote?.entryPoints || 0} / ${quote.quote?.exitPoints || 0}`],
+      ["Remote viewing", String(quote.quote?.remoteViewing || "Not set")],
+      ["Follow-up", quote.follow_up_date ? formatShortDate(quote.follow_up_date) : "Not scheduled"],
+    ];
+  }
+
+  return [
+    ["Daily energy", `${Math.round(Number(quote.daily_energy_wh || 0)).toLocaleString()} Wh`],
+    ["System voltage", quote.system_voltage ? `${quote.system_voltage}V` : "Not set"],
+    ["PV config", recommendation.pvConfigurationLabel || "Not available"],
+    ["Follow-up", quote.follow_up_date ? formatShortDate(quote.follow_up_date) : "Not scheduled"],
+  ];
 }
 
 function isOverdue(value?: string) {
@@ -508,7 +647,7 @@ function newsSlug(value: string) {
     .replace(/^-+|-+$/g, "") || `news-${Date.now()}`;
 }
 
-export default function SolarAdminApp({ activeSection = "dashboard", onSectionChange, currentUser }: SolarAdminAppProps) {
+export default function SolarAdminApp({ activeSection = "dashboard", onSectionChange, currentUser, onOpenMobileMenu }: SolarAdminAppProps) {
   const [products, setProducts] = useState<DbProduct[]>([]);
   const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
   const [chatConversations, setChatConversations] = useState<ChatConversation[]>([]);
@@ -521,6 +660,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
   const [editingForm, setEditingForm] = useState<ProductForm>(emptyForm);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [addProductOpen, setAddProductOpen] = useState(false);
+  const [fieldHintOpen, setFieldHintOpen] = useState("");
   const [highlightedGroup, setHighlightedGroup] = useState("");
   const [catalogueSearch, setCatalogueSearch] = useState("");
   const [catalogueCategoryFilter, setCatalogueCategoryFilter] = useState("all");
@@ -538,6 +678,9 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
   const [requestSort, setRequestSort] = useState<"newest" | "value" | "follow-up" | "last-contact">("newest");
   const [dashboardView, setDashboardView] = useState<"requests" | "value" | "catalogue" | "alerts">("requests");
   const [trendRange, setTrendRange] = useState<TrendRange>(7);
+  const [isTrendRangeMenuOpen, setIsTrendRangeMenuOpen] = useState(false);
+  const trendRangeMenuRef = useRef<HTMLDivElement | null>(null);
+  const [dashboardGraphMetric, setDashboardGraphMetric] = useState<DashboardGraphMetric>("value");
   const [activeTrendIndex, setActiveTrendIndex] = useState(6);
   const [contactAction, setContactAction] = useState<ContactAction>("call");
   const [stageNoteDraft, setStageNoteDraft] = useState("");
@@ -770,6 +913,71 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
     };
   }, [quotes, trendRange]);
   const activeTrendDay = quoteTrend.days[activeTrendIndex] || quoteTrend.days[quoteTrend.days.length - 1];
+  const dashboardGraphMetricOptions: Array<{ key: DashboardGraphMetric; label: string; shortLabel: string }> = [
+    { key: "value", label: "Quote value", shortLabel: "Value" },
+    { key: "requests", label: "Request count", shortLabel: "Requests" },
+    { key: "average", label: "Average quote", shortLabel: "Average" },
+  ];
+  const selectedDashboardGraphMetric = dashboardGraphMetricOptions.find((option) => option.key === dashboardGraphMetric) || dashboardGraphMetricOptions[0];
+  const getDashboardGraphMetricValue = (day: { value: number; count: number }) => {
+    if (dashboardGraphMetric === "requests") return day.count;
+    if (dashboardGraphMetric === "average") return day.count ? day.value / day.count : 0;
+    return day.value;
+  };
+  const formatDashboardGraphMetricValue = (value: number) => {
+    if (dashboardGraphMetric === "requests") {
+      const rounded = Math.round(value);
+      return `${rounded} request${rounded === 1 ? "" : "s"}`;
+    }
+    return formatNaira(value);
+  };
+  const mobileQuoteTrend = useMemo(() => {
+    const chartLeft = 22;
+    const chartRight = 298;
+    const chartTop = 18;
+    const chartBottom = 154;
+    const chartWidth = chartRight - chartLeft;
+    const chartHeight = chartBottom - chartTop;
+    const maxMetric = Math.max(1, ...quoteTrend.days.map((day) => getDashboardGraphMetricValue(day)));
+    const maxCount = Math.max(1, ...quoteTrend.days.map((day) => day.count));
+    const days = quoteTrend.days.map((day, index) => {
+      const x = chartLeft + index * (chartWidth / Math.max(1, quoteTrend.days.length - 1));
+      const metricValue = getDashboardGraphMetricValue(day);
+      return {
+        ...day,
+        x,
+        metricValue,
+        metricY: chartBottom - (metricValue / maxMetric) * chartHeight,
+        countY: chartBottom - (day.count / maxCount) * chartHeight,
+      };
+    });
+    return {
+      days,
+      metricPoints: days.map((day) => `${day.x},${day.metricY}`).join(" "),
+      countPoints: days.map((day) => `${day.x},${day.countY}`).join(" "),
+      metricAreaPoints: `${chartLeft},${chartBottom} ${days.map((day) => `${day.x},${day.metricY}`).join(" ")} ${chartRight},${chartBottom}`,
+      chartLeft,
+      chartRight,
+      chartTop,
+      chartBottom,
+      maxMetric,
+    };
+  }, [quoteTrend.days, dashboardGraphMetric]);
+  const activeMobileTrendDay = mobileQuoteTrend.days[activeTrendIndex] || mobileQuoteTrend.days[mobileQuoteTrend.days.length - 1];
+  useEffect(() => {
+    if (!isTrendRangeMenuOpen) return;
+    const closeRangeMenu = (event: MouseEvent | TouchEvent) => {
+      if (!trendRangeMenuRef.current?.contains(event.target as Node)) {
+        setIsTrendRangeMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", closeRangeMenu);
+    document.addEventListener("touchstart", closeRangeMenu);
+    return () => {
+      document.removeEventListener("mousedown", closeRangeMenu);
+      document.removeEventListener("touchstart", closeRangeMenu);
+    };
+  }, [isTrendRangeMenuOpen]);
 
   useEffect(() => {
     const latestIndexWithRequests = quoteTrend.days.reduce((latest, day, index) => (
@@ -1111,15 +1319,19 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
       setQuoteStatus("Your role can view CRM records only.");
       return;
     }
-    const requestType = quoteRequestType(selectedQuote).toLowerCase();
+    const requestType = quoteRequestTypeKey(selectedQuote);
     const message = [
       `Hello ${selectedQuote.client_name || "there"}, this is TRI-P Tech.`,
-      requestType === "cctv"
-        ? "We received your CCTV quote request."
-        : `We received your solar quote request of ${formatNaira(selectedQuote.total_cost)}.`,
-      requestType === "cctv"
-        ? "Our team will review the camera coverage and follow up shortly."
-        : "Our team will confirm the final setup after reviewing your site/load details.",
+      isGeneralEnquiry(selectedQuote)
+        ? "We received your message from the TRI-P Tech website."
+        : requestType === "cctv"
+          ? "We received your CCTV quote request."
+          : `We received your solar quote request of ${formatNaira(selectedQuote.total_cost)}.`,
+      isGeneralEnquiry(selectedQuote)
+        ? "Our team will review it and follow up shortly."
+        : requestType === "cctv"
+          ? "Our team will review the camera coverage and follow up shortly."
+          : "Our team will confirm the final setup after reviewing your site/load details.",
     ].join(" ");
     try {
       await navigator.clipboard.writeText(message);
@@ -1253,11 +1465,11 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...member, role }),
       });
-      if (!response.ok) throw new Error("Update failed.");
+      if (!response.ok) throw new Error(await apiErrorMessage(response, "Team role could not be updated."));
       await loadTeamMembers();
       setQuoteStatus("Team role updated.");
-    } catch {
-      setQuoteStatus("Team role could not be updated.");
+    } catch (error) {
+      setQuoteStatus(error instanceof Error ? error.message : "Team role could not be updated.");
     }
   };
 
@@ -1538,13 +1750,13 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error("Save failed.");
+      if (!response.ok) throw new Error(await apiErrorMessage(response, "Product could not be saved."));
       setForm((current) => ({ ...emptyForm, category: current.category }));
       setAddProductOpen(false);
       await loadProducts();
       setStatus("Product saved.");
-    } catch {
-      setStatus("Product could not be saved.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Product could not be saved.");
     }
   };
 
@@ -1570,12 +1782,12 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error("Update failed.");
+      if (!response.ok) throw new Error(await apiErrorMessage(response, "Product could not be updated."));
       setEditingId(null);
       await loadProducts();
       setStatus("Product updated.");
-    } catch {
-      setStatus("Product could not be updated.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Product could not be updated.");
     }
   };
 
@@ -1670,22 +1882,58 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
     setTarget: (updater: (current: ProductForm) => ProductForm) => void,
     key: keyof ProductForm,
     label: string,
-    type: "text" | "number" = "text"
-  ) => (
-    <label className="text-xs font-bold text-[#4f6a72]">
-      {label}
-      <input
-        type={type}
-        value={String(target[key] ?? "")}
-        onChange={(event) => setTarget((current) => ({
-          ...current,
-          [key]: type === "number" ? Number(event.target.value) : event.target.value,
-        }))}
-        className="mt-1 h-10 w-full rounded-md border border-[#bddbd4] px-3 text-sm text-[#082c3a]"
-      />
-    </label>
-  );
-
+    type: "text" | "number" = "text",
+    helper = "",
+    required = false
+  ) => {
+    const fieldHintId = `${label}-${String(key)}`;
+    return (
+      <div
+        className="relative text-xs font-bold text-[#4f6a72]"
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setFieldHintOpen("");
+          }
+        }}
+      >
+        <span className="flex items-center gap-1">
+          <span>{label}{required ? <span className="ml-0.5 text-[#d12f2f]">*</span> : null}</span>
+          {helper ? (
+            <span className="relative inline-flex">
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setFieldHintOpen((current) => (current === fieldHintId ? "" : fieldHintId));
+                }}
+                className="grid h-4 w-4 place-items-center rounded-full border border-[#bddbd4] bg-[#eef8f5] text-[10px] font-black text-[#117865] transition hover:border-[#117865] hover:bg-[#dff7ef] focus:outline-none focus:ring-2 focus:ring-[#c9f4e6]"
+                aria-label={`Show help for ${label}`}
+                aria-expanded={fieldHintOpen === fieldHintId}
+              >
+                i
+              </button>
+              {fieldHintOpen === fieldHintId ? (
+                <span className="absolute left-1/2 top-5 z-30 w-60 -translate-x-1/2 rounded-md border border-[#bddbd4] bg-[#082c3a] px-3 py-2 text-[11px] font-semibold leading-4 text-white shadow-xl">
+                  {helper}
+                </span>
+              ) : null}
+            </span>
+          ) : null}
+        </span>
+        <input
+          type={type}
+          min={type === "number" ? 0 : undefined}
+          aria-label={label}
+          value={String(target[key] ?? "")}
+          onChange={(event) => setTarget((current) => ({
+            ...current,
+            [key]: type === "number" ? Number(event.target.value) : event.target.value,
+          }))}
+          className="mt-1 h-10 w-full rounded-md border border-[#bddbd4] px-3 text-sm text-[#082c3a] outline-none focus:border-[#117865] focus:ring-2 focus:ring-[#c9f4e6]"
+        />
+      </div>
+    );
+  };
   const dashboardDetails = {
     requests: {
       title: "Request activity",
@@ -1746,10 +1994,178 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
   };
 
   return (
-    <div className="text-[#082c3a] [font-family:Arial,sans-serif]">
+    <div className={`min-h-screen text-[#082c3a] [font-family:Arial,sans-serif] ${activeSection === "requests" ? "bg-[#041722] lg:bg-transparent" : ""}`}>
       {activeSection === "dashboard" ? (
-      <section id="dashboard-overview" className="overflow-hidden rounded-lg border border-[#cfe5df] bg-white shadow-[0_18px_45px_rgba(8,44,58,0.08)]">
-        <div className="bg-[#082c3a] p-5 text-white">
+      <section id="dashboard-overview" className="flex flex-col overflow-hidden rounded-lg border border-[#cfe5df] bg-white shadow-[0_18px_45px_rgba(8,44,58,0.08)]">
+        <div className="block bg-[#f4faf8] p-0 sm:p-3 md:hidden">
+          <div className="overflow-hidden rounded-none border-y border-[#cfe5df] bg-white shadow-[0_20px_48px_rgba(8,44,58,0.12)] sm:rounded-[28px] sm:border">
+            <div className="space-y-4 p-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#117865]">Dashboard</p>
+                <h2 className="mt-1 text-2xl font-black text-[#082c3a]">Today at a glance</h2>
+                <p className="mt-1 text-xs leading-5 text-[#4f6a72]">Graph first, then the work queue. See what changed before opening details.</p>
+              </div>
+
+              <div className="rounded-[24px] border border-[#cfe5df] bg-white p-3 shadow-[0_18px_38px_rgba(17,120,101,0.10)]">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#60777f]">{selectedDashboardGraphMetric.label}</p>
+                    <strong className="mt-1 block truncate text-lg font-black leading-none text-[#117865]">{dashboardGraphMetric === "requests" ? `${quotes.length} requests` : dashboardGraphMetric === "average" ? formatNaira(averageEstimateValue) : formatNaira(totalEstimateValue)}</strong>
+                  </div>
+                  <div ref={trendRangeMenuRef} className="relative shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setIsTrendRangeMenuOpen((open) => !open)}
+                      className="min-w-[78px] rounded-full border border-[#cfe5df] bg-[#f4faf8] px-3 py-2 text-center text-[10px] font-black leading-tight text-[#082c3a] shadow-sm transition active:scale-[0.98]"
+                      aria-label="Change graph period"
+                      aria-haspopup="menu"
+                      aria-expanded={isTrendRangeMenuOpen}
+                    >
+                      Last {trendRange} days
+                    </button>
+                    {isTrendRangeMenuOpen ? (
+                      <div className="absolute right-0 top-[calc(100%+0.45rem)] z-30 w-32 rounded-2xl border border-[#cfe5df] bg-white p-1.5 shadow-[0_18px_36px_rgba(8,44,58,0.18)]" role="menu">
+                        {([7, 14, 30, 90] as TrendRange[]).map((range) => (
+                          <button
+                            key={range}
+                            type="button"
+                            onClick={() => {
+                              setTrendRange(range);
+                              setIsTrendRangeMenuOpen(false);
+                            }}
+                            className={`w-full rounded-xl px-3 py-2 text-left text-[11px] font-black transition active:scale-[0.98] ${trendRange === range ? "bg-[#117865] text-white" : "text-[#082c3a] hover:bg-[#eef8f5]"}`}
+                            role="menuitem"
+                          >
+                            Last {range} days
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-3 gap-1 rounded-2xl bg-[#f4faf8] p-1">
+                  {dashboardGraphMetricOptions.map((metric) => (
+                    <button
+                      key={metric.key}
+                      type="button"
+                      onClick={() => setDashboardGraphMetric(metric.key)}
+                      className={`rounded-xl px-2 py-2 text-center text-[10px] font-black leading-tight transition active:scale-[0.98] ${
+                        dashboardGraphMetric === metric.key
+                          ? "bg-[#117865] text-white shadow-[0_10px_22px_rgba(17,120,101,0.18)]"
+                          : "text-[#4f6a72] hover:bg-white hover:text-[#082c3a]"
+                      }`}
+                    >
+                      {metric.shortLabel}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative mt-3 overflow-hidden rounded-[18px] border border-[#edf4f2] bg-gradient-to-b from-[#f7fbfa] to-white px-0 py-2">
+                  {activeMobileTrendDay ? (
+                    <div className="absolute right-3 top-3 z-10 rounded-2xl bg-[#082c3a] px-3 py-2 text-right text-white shadow-[0_12px_28px_rgba(8,44,58,0.22)]">
+                      <span className="block text-[9px] font-black uppercase tracking-[0.08em] text-white/80">{activeMobileTrendDay.label.replace(" 2026", "")}</span>
+                      <strong className="block text-xs font-black text-[#67f5c5]">{formatDashboardGraphMetricValue(activeMobileTrendDay.metricValue)}</strong>
+                      <small className="block text-[9px] font-bold text-white/90">{activeMobileTrendDay.count} request{activeMobileTrendDay.count === 1 ? "" : "s"}</small>
+                    </div>
+                  ) : null}
+                  <svg viewBox="0 0 320 190" className="block h-56 w-full" role="img" aria-label="Mobile quote value trend chart">
+                    <defs>
+                      <linearGradient id="mobileQuoteArea" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#117865" stopOpacity="0.24" />
+                        <stop offset="100%" stopColor="#117865" stopOpacity="0.04" />
+                      </linearGradient>
+                    </defs>
+                    <rect x="8" y="10" width="304" height="154" rx="18" fill="#fbfdfc" />
+                    {[30, 61, 92, 123, 154].map((y) => <line key={y} x1="22" x2="298" y1={y} y2={y} stroke="#d8e7e3" strokeWidth="1" />)}
+                    <polygon points={mobileQuoteTrend.metricAreaPoints} fill="url(#mobileQuoteArea)" />
+                    <polyline points={mobileQuoteTrend.metricPoints} fill="none" stroke="#117865" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+                    {dashboardGraphMetric !== "requests" ? <polyline points={mobileQuoteTrend.countPoints} fill="none" stroke="#082c3a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="5 5" /> : null}
+                    {mobileQuoteTrend.days.map((day, index) => {
+                      const isActive = index === activeTrendIndex;
+                      return (
+                        <g key={day.key} onMouseEnter={() => setActiveTrendIndex(index)} onFocus={() => setActiveTrendIndex(index)} onClick={() => setActiveTrendIndex(index)} tabIndex={0} role="button" aria-label={`Inspect ${day.label}`} className="cursor-pointer">
+                          <rect x={Math.max(0, day.x - 16)} y="10" width="32" height="154" fill="transparent" />
+                          {isActive ? <line x1={day.x} x2={day.x} y1="18" y2="160" stroke="#94cbc0" strokeWidth="1.5" strokeDasharray="4 4" /> : null}
+                          {isActive ? <circle cx={day.x} cy={day.metricY} r="9" fill="#117865" opacity="0.13" /> : null}
+                          <circle cx={day.x} cy={day.metricY} r={isActive ? 4.7 : 3.2} fill="#117865" stroke="#ffffff" strokeWidth="2" />
+                          {dashboardGraphMetric !== "requests" ? <circle cx={day.x} cy={day.countY} r={isActive ? 4 : 2.8} fill="#082c3a" stroke="#ffffff" strokeWidth="1.5" /> : null}
+                          {(index === 0 || index === Math.floor(mobileQuoteTrend.days.length / 2) || index === mobileQuoteTrend.days.length - 1) ? (
+                            <text x={day.x} y="178" textAnchor="middle" fontSize="9" fontWeight={isActive ? "800" : "600"} fill={isActive ? "#082c3a" : "#60777f"}>{day.label.replace(" 2026", "")}</text>
+                          ) : null}
+                        </g>
+                      );
+                    })}
+                  </svg>
+                  <div className="mt-1 flex items-center justify-between px-2 text-[10px] font-bold text-[#60777f]">
+                    <span className="inline-flex items-center gap-1"><span className="h-1.5 w-4 rounded-full bg-[#117865]" /> {selectedDashboardGraphMetric.shortLabel}</span>
+                    <span className="inline-flex items-center gap-1"><span className="h-1.5 w-4 rounded-full bg-[#082c3a]" /> Requests</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <button type="button" onClick={() => openCrmPreset("all")} className="rounded-2xl border border-[#cfe5df] bg-white p-3 text-left shadow-sm transition active:scale-[0.98]">
+                  <span className="block text-[10px] font-black text-[#60777f]">New requests</span>
+                  <strong className="mt-2 block text-xl font-black text-[#082c3a]">{quotes.length}</strong>
+                </button>
+                <button type="button" onClick={() => openCrmPreset("due-soon")} className="rounded-2xl border border-[#cfe5df] bg-white p-3 text-left shadow-sm transition active:scale-[0.98]">
+                  <span className="block text-[10px] font-black text-[#60777f]">Needs follow-up</span>
+                  <strong className="mt-2 block text-xl font-black text-[#082c3a]">{overdueQuotes.length}</strong>
+                </button>
+                <button type="button" onClick={() => onSectionChange?.("messages")} className="rounded-2xl border border-[#cfe5df] bg-white p-3 text-left shadow-sm transition active:scale-[0.98]">
+                  <span className="block text-[10px] font-black text-[#60777f]">Unread chats</span>
+                  <strong className="mt-2 block text-xl font-black text-[#082c3a]">{chatCounts.waiting || 0}</strong>
+                </button>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black text-[#082c3a]">Pipeline</h3>
+                </div>
+                <div className="mt-2 grid grid-cols-4 gap-2">
+                  {pipelineByStatus.slice(0, 4).map((item) => (
+                    <button key={item.key} type="button" onClick={() => openCrmPreset("all", item.key)} className="flex min-h-[74px] flex-col items-center justify-center rounded-2xl border border-[#cfe5df] bg-[#ecfff7] px-2 py-3 text-center transition active:scale-[0.98]">
+                      <strong className="block text-lg font-black text-[#117865]">{item.count}</strong>
+                      <span className="mt-1 block w-full text-center text-[10px] font-black leading-tight text-[#4f6a72]">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black text-[#082c3a]">Next action</h3>
+                  <span className="rounded-full bg-[#fff4d8] px-2 py-1 text-[10px] font-black text-[#9b6a00]">due soon</span>
+                </div>
+                {(overdueQuotes[0] || openQuotes[0] || quotes[0]) ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextQuote = overdueQuotes[0] || openQuotes[0] || quotes[0];
+                      if (nextQuote) setSelectedQuoteId(nextQuote.id);
+                      onSectionChange?.("requests");
+                    }}
+                    className="mt-2 grid w-full grid-cols-[42px_1fr_auto] items-center gap-3 rounded-2xl border border-[#8ee8c1] bg-white p-3 text-left shadow-sm transition active:scale-[0.98]"
+                  >
+                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#dff2ed] text-sm font-black text-[#117865]">
+                      {(overdueQuotes[0] || openQuotes[0] || quotes[0])?.client_name?.slice(0, 2).toUpperCase() || "TA"}
+                    </span>
+                    <span>
+                      <strong className="block text-sm text-[#082c3a]">{(overdueQuotes[0] || openQuotes[0] || quotes[0])?.client_name || "Client request"}</strong>
+                      <small className="mt-1 block text-xs text-[#60777f]">{(overdueQuotes[0] || openQuotes[0] || quotes[0])?.location || (overdueQuotes[0] || openQuotes[0] || quotes[0])?.phone || "Review enquiry"}</small>
+                    </span>
+                    <span className="rounded-full bg-[#fff4d8] px-2 py-1 text-[10px] font-black text-[#9b6a00]">Open</span>
+                  </button>
+                ) : (
+                  <p className="mt-2 rounded-2xl border border-[#cfe5df] bg-white p-3 text-sm text-[#60777f]">No client request needs action right now.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="hidden md:block">
+        <div className="order-1 bg-[#082c3a] p-4 text-white md:p-5">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#68d8bd]">Dashboard</p>
@@ -1764,7 +2180,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
           </div>
         </div>
 
-        <div className="grid gap-3 bg-[#f7fbfa] p-4 md:grid-cols-4">
+        <div className="order-3 grid grid-cols-2 gap-2 bg-[#f7fbfa] p-3 sm:gap-3 sm:p-4 md:order-2 md:grid-cols-4">
           {[
             ["requests", "Open requests", openQuotes.length.toLocaleString(), `${quotes.length.toLocaleString()} total enquiries`],
             ["value", "Pipeline value", formatNaira(totalEstimateValue), `${formatNaira(wonValue)} won`],
@@ -1777,42 +2193,42 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
               onClick={() => setDashboardView(key as typeof dashboardView)}
               onMouseEnter={() => setDashboardView(key as typeof dashboardView)}
               onFocus={() => setDashboardView(key as typeof dashboardView)}
-              className={`rounded-lg border p-4 text-left shadow-sm transition ${
+              className={`rounded-lg border p-3 text-left shadow-sm transition sm:p-4 ${
                 dashboardView === key
                   ? "border-[#117865] bg-white shadow-[0_18px_38px_rgba(17,120,101,0.16)]"
                   : "border-[#d8e7e3] bg-white/80 hover:-translate-y-0.5 hover:border-[#117865] hover:bg-white hover:shadow-[0_14px_32px_rgba(17,120,101,0.14)]"
               }`}
             >
               <span className="block text-xs font-bold uppercase tracking-[0.12em] text-[#60777f]">{title}</span>
-              <strong className="mt-2 block text-2xl text-[#082c3a]">{value}</strong>
+              <strong className="mt-2 block text-xl text-[#082c3a] sm:text-2xl">{value}</strong>
               <small className="mt-1 block text-[#60777f]">{detail}</small>
             </button>
           ))}
         </div>
 
-        <div className="bg-white px-4 pb-4">
+        <div className="order-2 bg-white px-3 py-3 sm:px-4 sm:pb-4 md:order-3">
           <div
             className="overflow-hidden rounded-lg border border-[#cfe5df] bg-white shadow-sm transition hover:border-[#bddbd4] hover:shadow-[0_18px_45px_rgba(8,44,58,0.10)]"
             onMouseLeave={() => setActiveTrendIndex(quoteTrend.days.length - 1)}
           >
-            <div className="grid border-b border-[#d8e7e3] md:grid-cols-3">
-              <div className="border-b border-[#d8e7e3] bg-white px-5 py-4 md:border-b-0 md:border-r">
+            <div className="grid grid-cols-3 border-b border-[#d8e7e3]">
+              <div className="border-r border-[#d8e7e3] bg-white px-3 py-3 sm:px-5 sm:py-4">
                 <span className="block text-xs font-bold text-[#60777f]">Quote value</span>
-                <strong className="mt-1 block text-2xl text-[#082c3a]">{formatNaira(totalEstimateValue)}</strong>
+                <strong className="mt-1 block text-xl text-[#082c3a] sm:text-2xl">{formatNaira(totalEstimateValue)}</strong>
                 <small className="mt-1 block text-[#60777f]">{quoteTrend.rangeLabel} trend</small>
               </div>
-              <div className="border-b border-[#d8e7e3] bg-[#fbfdfc] px-5 py-4 md:border-b-0 md:border-r">
+              <div className="border-r border-[#d8e7e3] bg-[#fbfdfc] px-3 py-3 sm:px-5 sm:py-4">
                 <span className="block text-xs font-bold text-[#60777f]">Requests</span>
-                <strong className="mt-1 block text-2xl text-[#082c3a]">{quotes.length}</strong>
+                <strong className="mt-1 block text-xl text-[#082c3a] sm:text-2xl">{quotes.length}</strong>
                 <small className="mt-1 block text-[#60777f]">Submitted enquiries</small>
               </div>
-              <div className="bg-[#fbfdfc] px-5 py-4">
+              <div className="bg-[#fbfdfc] px-3 py-3 sm:px-5 sm:py-4">
                 <span className="block text-xs font-bold text-[#60777f]">Selected day</span>
-                <strong className="mt-1 block text-2xl text-[#117865]">{formatNaira(activeTrendDay?.value || 0)}</strong>
+                <strong className="mt-1 block text-xl text-[#117865] sm:text-2xl">{formatNaira(activeTrendDay?.value || 0)}</strong>
                 <small className="mt-1 block text-[#60777f]">{activeTrendDay?.label || "Today"} | {activeTrendDay?.count || 0} request{(activeTrendDay?.count || 0) === 1 ? "" : "s"}</small>
               </div>
             </div>
-            <div className="px-5 pt-4">
+            <div className="px-3 pt-3 sm:px-5 sm:pt-4">
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div>
                   <h3 className="text-base font-bold text-[#082c3a]">Quote trend</h3>
@@ -1844,7 +2260,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                 </div>
               </div>
               <div className="-mx-4 mt-3">
-                <svg viewBox="0 0 1500 270" className="block h-72 w-full" role="img" aria-label="Interactive quote trend line chart">
+                <svg viewBox="0 0 1500 270" className="block h-44 w-full sm:h-64 md:h-72" role="img" aria-label="Interactive quote trend line chart">
                   <defs>
                     <linearGradient id="quoteValueFill" x1="0" x2="0" y1="0" y2="1">
                       <stop offset="0%" stopColor="#117865" stopOpacity="0.22" />
@@ -1899,7 +2315,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
           </div>
         </div>
 
-        <div className="grid gap-4 bg-white px-4 pb-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="order-4 grid gap-4 bg-white px-4 pb-4 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-4 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -1920,7 +2336,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                   >
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-[#4f6a72]">{item.label}</span>
-                      <span className="text-[#60777f]">{item.count} · {formatNaira(item.value)}</span>
+                      <span className="text-[#60777f]">{item.count} {"\u00b7"} {formatNaira(item.value)}</span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-white">
                       <div className="h-full rounded-full bg-[#117865] transition-all" style={{ width: `${width}%` }} />
@@ -1963,7 +2379,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
           </div>
         </div>
 
-        <div className="grid gap-4 bg-white px-4 pb-4 xl:grid-cols-[0.8fr_1.2fr]">
+        <div className="order-5 grid gap-4 bg-white px-4 pb-4 xl:grid-cols-[0.8fr_1.2fr]">
           <div className="rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-4 shadow-sm">
             <h3 className="text-sm font-bold text-[#082c3a]">Value snapshot</h3>
             <div className="mt-4 grid gap-3">
@@ -2016,7 +2432,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
           </div>
         </div>
 
-        <div className="mx-4 mb-4 grid gap-4 rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-4 lg:grid-cols-[1fr_360px]">
+        <div className="order-6 mx-4 mb-4 grid gap-4 rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-4 lg:grid-cols-[1fr_360px]">
           <div>
             <h3 className="text-lg font-bold text-[#082c3a]">{dashboardDetails.title}</h3>
             <p className="mt-2 text-sm leading-6 text-[#60777f]">{dashboardDetails.body}</p>
@@ -2037,44 +2453,15 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
             ))}
           </div>
         </div>
+        </div>
       </section>
       ) : null}
 
       {activeSection === "messages" ? (
-      <section id="website-messages" className="rounded-lg border border-[#d8e7e3] bg-white p-4 shadow-sm md:p-5">
-        <div className="flex flex-col gap-3 border-b border-[#edf4f2] pb-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#117865]">Messages</p>
-            <h2 className="mt-1 text-xl font-bold text-[#082c3a]">Messages inbox</h2>
-            <p className="mt-1 text-sm text-[#60777f]">Manage website and WhatsApp conversations from one workspace.</p>
-          </div>
-          <button
-            type="button"
-            onClick={loadChatConversations}
-            className="h-10 rounded-md border border-[#bddbd4] px-4 text-sm font-bold text-[#082c3a] transition hover:bg-[#f4faf8]"
-          >
-            Refresh
-          </button>
-        </div>
+      <section id="website-messages" className="rounded-lg border border-[#d8e7e3] bg-white p-3 shadow-sm md:p-5">
 
-        <div className="mt-4 grid gap-3 md:grid-cols-4">
-          {chatStatuses.map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setChatStatusFilter(key)}
-              className={`rounded-lg border p-3 text-left transition ${
-                chatStatusFilter === key ? "border-[#117865] bg-[#eef8f5]" : "border-[#d8e7e3] bg-[#fbfdfc] hover:bg-white"
-              }`}
-            >
-              <span className="block text-xs font-bold uppercase tracking-[0.1em] text-[#60777f]">{label}</span>
-              <strong className="mt-1 block text-2xl text-[#082c3a]">{chatCounts[key]}</strong>
-              <small className="mt-1 block text-[#60777f]">Conversation{chatCounts[key] === 1 ? "" : "s"}</small>
-            </button>
-          ))}
-        </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-[1fr_180px]">
+        <div className="grid gap-3 md:grid-cols-[1fr_180px]">
           <input
             value={chatSearch}
             onChange={(event) => setChatSearch(event.target.value)}
@@ -2155,10 +2542,10 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
             </div>
           </div>
 
-          <div className="rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-4">
+          <div className="min-w-0 rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-3 sm:p-4">
             {selectedChat ? (
               <div className="flex min-h-[640px] flex-col">
-                <div className="rounded-lg bg-[#082c3a] p-4 text-white">
+                <div className="rounded-lg bg-[#082c3a] p-3 text-white sm:p-4">
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
                       <span className={`mb-2 inline-flex rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase ${
@@ -2166,7 +2553,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                       }`}>
                         {selectedChat.channel === "whatsapp" ? "WhatsApp" : "Website"}
                       </span>
-                      <h3 className="text-xl font-bold">{selectedChat.visitor_name || "Website visitor"}</h3>
+                      <h3 className="text-lg font-bold sm:text-xl">{selectedChat.visitor_name || "Website visitor"}</h3>
                       <p className="mt-1 text-sm text-[#cfe5df]">{selectedChat.phone || "No phone"} | {selectedChat.email || "No email"}</p>
                       <p className="mt-1 break-all text-xs text-[#9fc8bf]">{selectedChat.page_url || "No page captured"}</p>
                     </div>
@@ -2290,7 +2677,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
       ) : null}
 
       {activeSection === "team" && canManageTeam ? (
-      <section id="team-management" className="rounded-lg border border-[#d8e7e3] bg-white p-4 shadow-sm md:p-5">
+      <section id="team-management" className="rounded-lg border border-[#d8e7e3] bg-white p-3 shadow-sm md:p-5">
         <div className="flex flex-col gap-3 border-b border-[#edf4f2] pb-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#117865]">Team</p>
@@ -2304,7 +2691,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
 
         <div className="mt-5 grid gap-4 xl:grid-cols-[360px_1fr]">
           <div className="grid gap-4">
-          <div className="rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-4">
+          <div className="min-w-0 rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-3 sm:p-4">
             <h3 className="text-sm font-bold text-[#082c3a]">Add user</h3>
             <div className="mt-4 grid gap-3">
               <label className="text-xs font-bold text-[#4f6a72]">
@@ -2362,13 +2749,13 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
 
           </div>
 
-          <div className="overflow-hidden rounded-lg border border-[#d8e7e3]">
+          <div className="overflow-hidden rounded-lg border border-[#d8e7e3] md:overflow-x-auto">
             <div className="grid grid-cols-[1.1fr_1fr_160px_240px_80px] bg-[#fbfdfc] px-4 py-3 text-xs font-bold uppercase text-[#60777f]">
               <span>User</span>
               <span>Email</span>
               <span>Role</span>
               <span>Password</span>
-              <span className="text-right">Action</span>
+              <span className="rounded-md bg-[#fbfdfc] p-2 text-left text-xs md:bg-transparent md:p-0 md:text-right md:text-sm">Action</span>
             </div>
             <div>
               {teamMembers.map((member) => (
@@ -2431,7 +2818,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
       ) : null}
 
       {activeSection === "settings" && canManageTeam ? (
-      <section id="admin-settings" className="rounded-lg border border-[#d8e7e3] bg-white p-4 shadow-sm md:p-5">
+      <section id="admin-settings" className="rounded-lg border border-[#d8e7e3] bg-white p-3 shadow-sm md:p-5">
         <div className="flex flex-col gap-3 border-b border-[#edf4f2] pb-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#117865]">Settings</p>
@@ -2446,7 +2833,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
         </div>
 
         <div className="mt-5 max-w-[520px]">
-          <div className="rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-4">
+          <div className="min-w-0 rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-3 sm:p-4">
             <h3 className="text-sm font-bold text-[#082c3a]">Change master password</h3>
             <p className="mt-1 text-xs leading-5 text-[#60777f]">
               {masterPasswordConfigured
@@ -2491,7 +2878,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
       ) : null}
 
       {activeSection === "help" ? (
-      <section id="admin-help" className="rounded-lg border border-[#d8e7e3] bg-white p-4 shadow-sm md:p-5">
+      <section id="admin-help" className="rounded-lg border border-[#d8e7e3] bg-white p-3 shadow-sm md:p-5">
         <div className="flex flex-col gap-3 border-b border-[#edf4f2] pb-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#117865]">Help</p>
@@ -2524,7 +2911,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
             {
               title: "Product catalogue",
               items: [
-                "Products added here feed the calculator recommendations.",
+                "Products added here feed the calculator recommendations immediately after saving.",
                 "Use accurate brand, capacity, voltage, price, and default selections.",
                 "Avoid duplicate products under the same brand/category/capacity/voltage.",
               ],
@@ -2535,6 +2922,13 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                 "The calculator uses load entries, selected brands, assumptions, and catalogue prices.",
                 "Final quote requests are saved to the database and sent by email.",
                 "Excel quote generation is available after admin login.",
+              ],
+            },
+            {
+              title: "Messages",
+              items: [
+                "Use Messages to review website and WhatsApp conversations from one workspace.",
+                "Refresh the page when you need the latest chat activity.",
               ],
             },
           ].map((section) => (
@@ -2562,7 +2956,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
       ) : null}
 
       {activeSection === "news" && canManageNews ? (
-      <section id="admin-news" className="rounded-lg border border-[#d8e7e3] bg-white p-4 shadow-sm md:p-5">
+      <section id="admin-news" className="rounded-lg border border-[#d8e7e3] bg-white p-3 shadow-sm md:p-5">
         <div className="flex flex-col gap-3 border-b border-[#edf4f2] pb-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#117865]">News</p>
@@ -2579,7 +2973,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
         </div>
 
         <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.75fr)]">
-          <div className="rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-4">
+          <div className="min-w-0 rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-3 sm:p-4">
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-base font-bold text-[#082c3a]">{editingNewsId ? "Edit post" : "Create post"}</h3>
               {editingNewsId ? (
@@ -2877,7 +3271,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
             </div>
 
             <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
-              <div className="rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-4">
+              <div className="min-w-0 rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-3 sm:p-4">
                 <div className="flex items-center justify-between gap-3">
                   <h4 className="text-sm font-bold text-[#082c3a]">{editingVideoId ? "Edit video" : "Add video"}</h4>
                   {editingVideoId ? (
@@ -2999,7 +3393,38 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
       ) : null}
 
       {activeSection === "requests" ? (
-      <section id="client-requests" className="rounded-lg border border-[#d8e7e3] bg-white p-4 shadow-sm md:p-5">
+      <>
+      <section className="min-h-[100svh] overflow-hidden rounded-[26px] border border-[#0b3d4d] bg-[#041722] shadow-[0_22px_55px_rgba(8,44,58,0.18)] lg:hidden">
+        <div className="relative min-h-[100svh] bg-[#041722] p-5 pb-24 text-white">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,217,123,0.18),transparent_34%),linear-gradient(180deg,#041722_0%,#061c28_54%,#041722_100%)]" />
+          <div className="relative z-10 flex h-full min-h-[calc(100svh-7rem)] flex-col justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#16e08f]">TRI-P CRM</p>
+              <h2 className="mt-3 text-3xl font-black leading-tight">Ouch, this needs a desktop.</h2>
+            </div>
+
+            <div className="flex flex-1 items-center py-8">
+            <div className="relative w-full overflow-hidden rounded-[22px] border border-[#16e08f]/70 bg-white/8 p-4 shadow-[0_18px_50px_rgba(0,217,123,0.12)] backdrop-blur-md">
+              <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full border border-[#16e08f]/35" />
+              <div className="grid grid-cols-[105px_1fr] items-center gap-4">
+                <div className="relative h-36 overflow-hidden rounded-2xl border border-[#16e08f]/35 bg-[#062333]">
+                  <img
+                    src="/images/tri-p-wizard-guide-step-7.png"
+                    alt="TRI-P guide"
+                    className="absolute inset-x-0 bottom-0 mx-auto h-44 w-auto object-contain"
+                  />
+                </div>
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#16e08f]">TRI-P guide</p>
+                  <p className="mt-2 text-lg font-black leading-7">Please open CRM on a laptop or desktop.</p>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="client-requests" className="hidden rounded-lg border border-[#d8e7e3] bg-white p-3 shadow-sm md:p-5 lg:block">
         <div className="flex flex-col gap-3 border-b border-[#edf4f2] pb-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#117865]">CRM</p>
@@ -3015,30 +3440,30 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
           </button>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-4">
+        <div className="mt-3 grid grid-cols-2 gap-2 md:mt-4 md:gap-3 md:grid-cols-4">
           {[
             ["Active leads", openQuotes.length, "Requests not won/lost", "text-[#117865]"],
             ["Overdue", overdueQuotes.length, "Needs follow-up now", "text-[#9b2f2f]"],
             ["Due soon", dueSoonQuotes.length, "Next 3 days", "text-[#8a6417]"],
-            ["High value", hotLeads.length, "Above ₦5m estimate", "text-[#117865]"],
+            ["High value", hotLeads.length, "Above \u20a65m estimate", "text-[#117865]"],
           ].map(([label, value, detail, tone]) => {
             const preset = label === "Overdue" ? "overdue" : label === "Due soon" ? "due-soon" : label === "High value" ? "high-value" : "open";
             return (
-            <button key={String(label)} type="button" onClick={() => openCrmPreset(preset as RequestPriorityFilter)} className={`rounded-lg border p-3 text-left transition ${requestPriorityFilter === preset ? "border-[#117865] bg-[#eef8f5]" : "border-[#d8e7e3] bg-[#fbfdfc] hover:bg-white"}`}>
+            <button key={String(label)} type="button" onClick={() => openCrmPreset(preset as RequestPriorityFilter)} className={`rounded-md border p-2.5 text-left transition active:scale-[0.99] md:rounded-lg md:p-3 ${requestPriorityFilter === preset ? "border-[#117865] bg-[#eef8f5]" : "border-[#d8e7e3] bg-[#fbfdfc] hover:bg-white"}`}>
               <span className="block text-xs font-bold uppercase tracking-[0.1em] text-[#60777f]">{label}</span>
-              <strong className={`mt-1 block text-2xl ${tone}`}>{value}</strong>
+              <strong className={`mt-1 block text-xl md:text-2xl ${tone}`}>{value}</strong>
               <small className="mt-1 block text-[#60777f]">{detail}</small>
             </button>
           )})}
         </div>
 
-        <div className="mt-4 grid gap-2 md:grid-cols-4 xl:grid-cols-7">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:mt-4 md:grid-cols-4 xl:grid-cols-7">
           {pipelineByStatus.map((item) => (
             <button
               key={item.key}
               type="button"
               onClick={() => setRequestStatusFilter(item.key)}
-              className={`rounded-md border px-3 py-2 text-left transition ${
+              className={`rounded-md border px-3 py-2 text-left transition active:scale-[0.99] ${
                 requestStatusFilter === item.key ? "border-[#117865] bg-[#eef8f5]" : "border-[#d8e7e3] bg-[#fbfdfc] hover:bg-[#f4faf8]"
               }`}
             >
@@ -3050,7 +3475,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
           <button
             type="button"
             onClick={() => setRequestStatusFilter("all")}
-            className={`rounded-md border px-3 py-2 text-left transition ${
+            className={`rounded-md border px-3 py-2 text-left transition active:scale-[0.99] ${
               requestStatusFilter === "all" ? "border-[#117865] bg-[#eef8f5]" : "border-[#d8e7e3] bg-[#fbfdfc] hover:bg-[#f4faf8]"
             }`}
           >
@@ -3059,7 +3484,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
           </button>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-[1fr_180px_180px_180px_160px]">
+        <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2 md:mt-4 xl:grid-cols-[1fr_180px_180px_180px_160px]">
           <input
             value={requestSearch}
             onChange={(event) => setRequestSearch(event.target.value)}
@@ -3135,15 +3560,15 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
 
         {quoteStatus ? <p className="mt-3 text-sm font-semibold text-[#117865]">{quoteStatus}</p> : null}
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(360px,0.95fr)_1.25fr]">
-          <div className="overflow-hidden rounded-lg border border-[#d8e7e3]">
-            <div className="grid grid-cols-[1.3fr_0.75fr_0.75fr_0.75fr] bg-[#fbfdfc] px-3 py-2 text-xs font-bold uppercase text-[#60777f]">
+        <div className="mt-4 grid min-w-0 gap-3 lg:grid-cols-[minmax(360px,0.95fr)_1.25fr] lg:gap-4">
+          <div className="overflow-hidden rounded-lg border border-[#d8e7e3] md:overflow-x-auto">
+            <div className="hidden min-w-[640px] grid-cols-[1.3fr_0.75fr_0.75fr_0.75fr] bg-[#fbfdfc] px-3 py-2 text-xs font-bold uppercase text-[#60777f] md:grid">
               <span>Client</span>
               <span>Owner</span>
               <span>Status</span>
               <span className="text-right">Estimate</span>
             </div>
-            <div className="max-h-[620px] overflow-y-auto">
+            <div className="max-h-[430px] min-w-0 overflow-y-auto md:max-h-[620px] md:min-w-[640px]">
               {filteredQuotes.length ? filteredQuotes.map((quote) => {
                 const priority = leadPriority(quote);
                 return (
@@ -3151,11 +3576,11 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                     key={quote.id}
                     type="button"
                     onClick={() => setSelectedQuoteId(quote.id)}
-                    className={`grid w-full grid-cols-[1.3fr_0.75fr_0.75fr_0.75fr] gap-2 border-t border-[#edf4f2] px-3 py-3 text-left text-sm transition ${
+                    className={`grid w-full grid-cols-2 gap-2 border-t border-[#edf4f2] px-3 py-3 text-left text-sm transition active:scale-[0.995] md:grid-cols-[1.3fr_0.75fr_0.75fr_0.75fr] ${
                       selectedQuote?.id === quote.id ? "bg-[#eef8f5]" : "bg-white hover:bg-[#fbfdfc]"
                     }`}
                   >
-                    <span className="min-w-0">
+                    <span className="col-span-2 min-w-0 md:col-span-1">
                       <strong className="block truncate text-[#082c3a]">{quote.client_name || "Client"}</strong>
                       <small className="mt-1 block truncate text-[#60777f]">{quote.phone || quote.email || "No contact"}</small>
                       <span className="mt-2 flex flex-wrap gap-1">
@@ -3167,24 +3592,29 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                         </span>
                       </span>
                     </span>
-                    <span>
+                    <span className="rounded-md bg-[#fbfdfc] p-2 text-xs md:bg-transparent md:p-0 md:text-sm">
+                      <small className="mb-1 block font-bold uppercase text-[#60777f] md:hidden">Owner</small>
                       <strong className="block truncate text-[#082c3a]">{quote.assigned_to || "Unassigned"}</strong>
                       <small className="mt-1 block text-[#60777f]">
-                        {roleForStaff(quote.assigned_to) || "No role"} · {formatShortDate(quote.last_contacted_at || "")}
+                        {roleForStaff(quote.assigned_to) || "No role"} {"\u00b7"} {formatShortDate(quote.last_contacted_at || "")}
                       </small>
                     </span>
-                    <span>
+                    <span className="rounded-md bg-[#fbfdfc] p-2 text-xs md:bg-transparent md:p-0 md:text-sm">
+                      <small className="mb-1 block font-bold uppercase text-[#60777f] md:hidden">Status</small>
                       <span className={`inline-flex rounded-full border px-2 py-1 text-xs font-bold ${quoteStatusClass(quote.status)}`}>
                         {quoteStatusLabel(quote.status)}
                       </span>
                       <small className="mt-2 block text-[#60777f]">{formatShortDate(quote.follow_up_date)}</small>
                     </span>
-                    <span className="text-right">
+                    <span className="rounded-md bg-[#fbfdfc] p-2 text-left text-xs md:bg-transparent md:p-0 md:text-right md:text-sm">
+                      <small className="mb-1 block font-bold uppercase text-[#60777f] md:hidden">Estimate</small>
                       <strong className="block text-[#117865]">{formatNaira(quote.total_cost)}</strong>
                       <small className="mt-1 block text-[#60777f]">
-                        {quoteRequestType(quote).toLowerCase() === "cctv"
-                          ? `${quote.quote?.cameraCount || 0} camera(s)`
-                          : `${Math.round(Number(quote.daily_energy_wh || 0)).toLocaleString()} Wh`}
+                        {isGeneralEnquiry(quote)
+                          ? "Message"
+                          : quoteRequestTypeKey(quote) === "cctv"
+                            ? `${quote.quote?.cameraCount || 0} camera(s)`
+                            : `${Math.round(Number(quote.daily_energy_wh || 0)).toLocaleString()} Wh`}
                       </small>
                     </span>
                   </button>
@@ -3195,17 +3625,19 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
             </div>
           </div>
 
-          <div className="rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-4">
+          <div className="min-w-0 rounded-lg border border-[#d8e7e3] bg-[#fbfdfc] p-3 sm:p-4">
             {selectedQuote ? (() => {
               const recommendation = quoteRecommendation(selectedQuote);
               const priority = leadPriority(selectedQuote);
+              const isGeneral = isGeneralEnquiry(selectedQuote);
+              const selectedRequestType = quoteRequestTypeKey(selectedQuote);
               return (
                 <div className="space-y-4">
-                  <div className="rounded-lg bg-[#082c3a] p-4 text-white">
+                  <div className="rounded-lg bg-[#082c3a] p-3 text-white sm:p-4">
                     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-xl font-bold">{selectedQuote.client_name || "Client"}</h3>
+                        <h3 className="text-lg font-bold sm:text-xl">{selectedQuote.client_name || "Client"}</h3>
                         <span className={`rounded-full border px-2 py-1 text-xs font-bold ${quoteStatusClass(selectedQuote.status)}`}>
                           {quoteStatusLabel(selectedQuote.status)}
                         </span>
@@ -3220,26 +3652,15 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                       <p className="text-sm text-[#cfe5df]">{selectedQuote.location || "No location"} | {formatDate(selectedQuote.created_at)}</p>
                     </div>
                     <div className="text-left md:text-right">
-                      <strong className="block text-2xl text-[#68d8bd]">{formatNaira(selectedQuote.total_cost)}</strong>
-                      <span className="text-xs font-bold uppercase text-[#cfe5df]">Opportunity value</span>
+                      <strong className="block text-xl text-[#68d8bd] sm:text-2xl">{isGeneral ? "Message" : formatNaira(selectedQuote.total_cost)}</strong>
+                      <span className="text-xs font-bold uppercase text-[#cfe5df]">{isGeneral ? "Request type" : "Opportunity value"}</span>
                     </div>
                     </div>
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-4">
-                    {[
-                      quoteRequestType(selectedQuote).toLowerCase() === "cctv"
-                        ? ["Cameras", `${selectedQuote.quote?.cameraCount || 0}`]
-                        : ["Daily energy", `${Math.round(Number(selectedQuote.daily_energy_wh || 0)).toLocaleString()} Wh`],
-                      quoteRequestType(selectedQuote).toLowerCase() === "cctv"
-                        ? ["Entry/exit", `${selectedQuote.quote?.entryPoints || 0} / ${selectedQuote.quote?.exitPoints || 0}`]
-                        : ["System voltage", selectedQuote.system_voltage ? `${selectedQuote.system_voltage}V` : "Not set"],
-                      quoteRequestType(selectedQuote).toLowerCase() === "cctv"
-                        ? ["Remote viewing", selectedQuote.quote?.remoteViewing || "Not set"]
-                        : ["PV config", recommendation.pvConfigurationLabel || "Not available"],
-                      ["Follow-up", selectedQuote.follow_up_date ? formatShortDate(selectedQuote.follow_up_date) : "Not scheduled"],
-                    ].map(([label, value]) => (
-                      <div key={label} className="rounded-md border border-[#d8e7e3] bg-white p-3">
+                  <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
+                    {quoteOverviewMetrics(selectedQuote, recommendation).map(([label, value]) => (
+                      <div key={label} className="rounded-md border border-[#d8e7e3] bg-white p-2.5 sm:p-3">
                         <span className="block text-xs font-bold uppercase text-[#60777f]">{label}</span>
                         <strong className="mt-1 block text-sm text-[#082c3a]">{value}</strong>
                       </div>
@@ -3248,8 +3669,23 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
 
                   <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
                     <div className="space-y-4">
-                      {quoteRequestType(selectedQuote).toLowerCase() === "cctv" ? (
-                      <div className="rounded-md border border-[#d8e7e3] bg-white p-3">
+                      {isGeneral ? (
+                      <div className="rounded-md border border-[#d8e7e3] bg-white p-2.5 sm:p-3">
+                        <h4 className="text-sm font-bold text-[#082c3a]">Website enquiry</h4>
+                        <dl className="mt-3 grid gap-2 text-sm">
+                          {[
+                            ["Source", selectedQuote.quote?.source || selectedQuote.location || "Contact page"],
+                            ["Message", quoteMessage(selectedQuote)],
+                          ].map(([label, value]) => (
+                            <div key={label} className="grid gap-1 border-b border-[#edf4f2] pb-2 last:border-b-0 last:pb-0 sm:grid-cols-[90px_1fr] sm:gap-3">
+                              <dt className="font-bold text-[#60777f]">{label}</dt>
+                              <dd className="text-[#082c3a]">{value}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </div>
+                      ) : selectedRequestType === "cctv" ? (
+                      <div className="rounded-md border border-[#d8e7e3] bg-white p-2.5 sm:p-3">
                         <h4 className="text-sm font-bold text-[#082c3a]">CCTV scope</h4>
                         <dl className="mt-3 grid gap-2 text-sm">
                           {[
@@ -3259,7 +3695,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                             ["Exit points", `${selectedQuote.quote?.exitPoints || 0}`],
                             ["Remote viewing", selectedQuote.quote?.remoteViewing || "Not set"],
                           ].map(([label, value]) => (
-                            <div key={label} className="grid grid-cols-[110px_1fr] gap-3 border-b border-[#edf4f2] pb-2 last:border-b-0 last:pb-0">
+                            <div key={label} className="grid gap-1 border-b border-[#edf4f2] pb-2 last:border-b-0 last:pb-0 sm:grid-cols-[110px_1fr] sm:gap-3">
                               <dt className="font-bold text-[#60777f]">{label}</dt>
                               <dd className="text-[#082c3a]">{value}</dd>
                             </div>
@@ -3267,7 +3703,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                         </dl>
                       </div>
                       ) : (
-                      <div className="rounded-md border border-[#d8e7e3] bg-white p-3">
+                      <div className="rounded-md border border-[#d8e7e3] bg-white p-2.5 sm:p-3">
                         <h4 className="text-sm font-bold text-[#082c3a]">Recommended setup</h4>
                         <dl className="mt-3 grid gap-2 text-sm">
                           {[
@@ -3276,7 +3712,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                             ["Inverter", recommendation.selectedInverter?.label ? `${recommendation.inverterCount || 1} x ${recommendation.selectedInverter.label}` : "Not available"],
                             ["Controller", recommendation.selectedController?.label ? `${recommendation.controllerCount || 1} x ${recommendation.selectedController.label}` : "Not needed"],
                           ].map(([label, value]) => (
-                            <div key={label} className="grid grid-cols-[90px_1fr] gap-3 border-b border-[#edf4f2] pb-2 last:border-b-0 last:pb-0">
+                            <div key={label} className="grid gap-1 border-b border-[#edf4f2] pb-2 last:border-b-0 last:pb-0 sm:grid-cols-[90px_1fr] sm:gap-3">
                               <dt className="font-bold text-[#60777f]">{label}</dt>
                               <dd className="text-[#082c3a]">{value}</dd>
                             </div>
@@ -3285,12 +3721,12 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                       </div>
                       )}
 
-                      {quoteRequestType(selectedQuote).toLowerCase() !== "cctv" ? (
-                      <div className="rounded-md border border-[#d8e7e3] bg-white p-3">
+                      {!isGeneral && selectedRequestType !== "cctv" ? (
+                      <div className="rounded-md border border-[#d8e7e3] bg-white p-2.5 sm:p-3">
                         <h4 className="text-sm font-bold text-[#082c3a]">Loads</h4>
-                        <div className="mt-2 max-h-52 overflow-y-auto">
+                        <div className="mt-2 max-h-52 overflow-x-auto overflow-y-auto">
                           {selectedQuote.quote?.loads?.length ? (
-                            <table className="w-full text-left text-xs">
+                            <table className="min-w-[360px] w-full text-left text-xs">
                               <thead className="sticky top-0 bg-white text-[#60777f]">
                                 <tr>
                                   <th className="py-2">Appliance</th>
@@ -3317,11 +3753,11 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                       </div>
                       ) : null}
 
-                      <div className="rounded-md border border-[#d8e7e3] bg-white p-3">
+                      <div className="rounded-md border border-[#d8e7e3] bg-white p-2.5 sm:p-3">
                         <h4 className="text-sm font-bold text-[#082c3a]">Quote items</h4>
-                        <div className="mt-2 max-h-56 overflow-y-auto">
+                        <div className="mt-2 max-h-56 overflow-x-auto overflow-y-auto">
                           {recommendation.quoteLines?.length ? (
-                            <table className="w-full text-left text-xs">
+                            <table className="min-w-[360px] w-full text-left text-xs">
                               <thead className="sticky top-0 bg-white text-[#60777f]">
                                 <tr>
                                   <th className="py-2">Item</th>
@@ -3349,7 +3785,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                       </div>
                     </div>
 
-                    <div className="rounded-md border border-[#d8e7e3] bg-white p-3">
+                    <div className="rounded-md border border-[#d8e7e3] bg-white p-2.5 sm:p-3">
                       <div className="flex items-center justify-between gap-3">
                         <h4 className="text-sm font-bold text-[#082c3a]">Follow-up</h4>
                         <span className={`rounded-full border px-2 py-1 text-xs font-bold ${priority.className}`}>{priority.label}</span>
@@ -3501,6 +3937,7 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
           </div>
         </div>
       </section>
+      </>
       ) : null}
 
       {catalogueMode && !canManageCatalogue ? (
@@ -3524,10 +3961,10 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
           </div>
           <button
             type="button"
-            onClick={() => setAddProductOpen((current) => !current)}
+            onClick={() => setAddProductOpen(true)}
             className="inline-flex h-11 items-center justify-center rounded-full bg-[#117865] px-5 text-sm font-bold text-white transition hover:bg-[#0d6757]"
           >
-            {addProductOpen ? "Close product form" : "Add product"}
+            Add product
           </button>
         </div>
       </section>
@@ -3558,61 +3995,101 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
       </div>
 
       {addProductOpen ? (
-        <section className="rounded-lg border border-[#d8e7e3] bg-white p-4 shadow-sm">
-          <div className="flex flex-col gap-2 border-b border-[#edf4f2] pb-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h3 className="text-base font-bold text-[#082c3a]">Add catalogue item</h3>
-              <p className="mt-1 text-xs text-[#60777f]">Only fields needed by the selected category are shown.</p>
+        <div
+          className="fixed inset-0 z-[80] flex items-end justify-center bg-[#02151d]/70 px-3 py-4 backdrop-blur-sm sm:items-center sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="add-product-title"
+        >
+          <button
+            type="button"
+            aria-label="Close add product form"
+            onClick={() => setAddProductOpen(false)}
+            className="absolute inset-0 h-full w-full cursor-default"
+          />
+          <section className="relative z-[81] max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-[#bddbd4] bg-white shadow-[0_28px_90px_rgba(2,21,29,0.38)]">
+            <div className="sticky top-0 z-10 border-b border-[#d8e7e3] bg-white/95 px-4 py-4 backdrop-blur sm:px-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#117865]">Catalogue</p>
+                  <h3 id="add-product-title" className="mt-1 text-xl font-black text-[#082c3a]">Add product</h3>
+                  <p className="mt-1 max-w-2xl text-sm leading-6 text-[#60777f]">
+                    Choose a category and fill only the details that apply.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAddProductOpen(false)}
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#bddbd4] bg-[#f4faf8] text-lg font-black text-[#082c3a] transition hover:border-[#117865] hover:bg-[#e6f5f0]"
+                  aria-label="Close"
+                >
+                  x
+                </button>
+              </div>
             </div>
-            <button type="button" onClick={seedDefaults} className="h-10 rounded-full bg-[#082c3a] px-4 text-sm font-bold text-white">
-              Load starter catalogue
-            </button>
-          </div>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-4">
-            <label className="text-xs font-bold text-[#4f6a72]">
-              Category
-              <select
-                value={form.category}
-                onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
-                className="mt-1 h-10 w-full rounded-md border border-[#bddbd4] px-3 text-sm text-[#082c3a]"
-              >
-                {categoryOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-              </select>
-            </label>
-            {([
-              ["manufacturer", "Brand / manufacturer", "text"],
-              ["model", "Model / name", "text"],
-              ["capacity_label", "Capacity label", "text"],
-              ["capacity", "Capacity", "number"],
-              ["voltage", form.category === "knife-switch" ? "Poles" : "Voltage", "number"],
-              ["price", "Price", "number"],
-              ["surge_va", "Surge VA", "number"],
-              ["hybrid_pv_current_a", "Hybrid PV current", "number"],
-            ] as Array<[keyof ProductForm, string, "text" | "number"]>)
-              .filter(([key]) => productFieldApplies(form.category, key))
-              .map(([key, label, type]) => formField(form, setForm, key, label, type))}
-          </div>
+            <div className="p-4 sm:p-6">
+              <div className="grid gap-3 rounded-xl border border-[#d8e7e3] bg-[#f7fbfa] p-3 sm:grid-cols-2 lg:grid-cols-4">
+                <label className="text-xs font-bold text-[#4f6a72]">
+                  <span>Category<span className="ml-0.5 text-[#d12f2f]">*</span></span>
+                  <select
+                    value={form.category}
+                    onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
+                    className="mt-1 h-11 w-full rounded-md border border-[#bddbd4] bg-white px-3 text-sm text-[#082c3a] outline-none focus:border-[#117865]"
+                  >
+                    {categoryOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                  </select>
+                </label>
+                {([
+                  ["manufacturer", "Brand / manufacturer", "text"],
+                  ["model", "Model / name", "text"],
+                  ["capacity_label", "Display label", "text"],
+                  ["capacity", "Capacity", "number"],
+                  ["voltage", form.category === "knife-switch" ? "Poles" : "Voltage", "number"],
+                  ["price", "Price", "number"],
+                  ["surge_va", "Surge VA", "number"],
+                  ["hybrid_pv_current_a", "Hybrid PV current", "number"],
+                ] as Array<[keyof ProductForm, string, "text" | "number"]>)
+                  .filter(([key]) => productFieldApplies(form.category, key))
+                  .map(([key, label, type]) => formField(form, setForm, key, productFieldLabel(form.category, key, label), type, productFieldHelp(form.category, key), isRequiredProductField(form.category, key)))}
+              </div>
 
-          <div className="mt-4 flex flex-wrap gap-3">
-            <button type="button" onClick={saveProduct} className="rounded-full bg-[#117865] px-5 py-3 text-sm font-bold text-white">
-              Save product
-            </button>
-            <button type="button" onClick={() => setAddProductOpen(false)} className="rounded-full bg-[#eef7f4] px-5 py-3 text-sm font-bold text-[#082c3a]">
-              Cancel
-            </button>
-            {editingId ? (
-              <button type="button" onClick={() => setEditingId(null)} className="rounded-full bg-[#f7e9e9] px-5 py-3 text-sm font-bold text-[#9b1c1c]">
-                Cancel edit
-              </button>
-            ) : null}
-          </div>
-          {status ? <p className="mt-3 text-sm font-semibold text-[#117865]">{status}</p> : null}
-        </section>
+              <div className="mt-5 flex flex-col gap-3 border-t border-[#edf4f2] pt-4 sm:flex-row sm:items-center sm:justify-between">
+
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  {editingId ? (
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="h-11 rounded-full bg-[#f7e9e9] px-5 text-sm font-bold text-[#9b1c1c] transition hover:bg-[#f2dcdc]"
+                    >
+                      Cancel edit
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setAddProductOpen(false)}
+                    className="h-11 rounded-full bg-[#eef7f4] px-5 text-sm font-bold text-[#082c3a] transition hover:bg-[#dff0eb]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveProduct}
+                    className="h-11 rounded-full bg-[#117865] px-6 text-sm font-bold text-white shadow-[0_12px_30px_rgba(17,120,101,0.22)] transition hover:bg-[#0d6757]"
+                  >
+                    Save product
+                  </button>
+                </div>
+              </div>
+              {status ? <p className={`mt-4 rounded-lg border px-4 py-3 text-sm font-semibold shadow-sm ${catalogueStatusClass(status)}`}>{status}</p> : null}
+            </div>
+          </section>
+        </div>
       ) : status ? (
-        <p className="rounded-lg border border-[#d8e7e3] bg-white px-4 py-3 text-sm font-semibold text-[#117865] shadow-sm">{status}</p>
+        <p className={`rounded-lg border px-4 py-3 text-sm font-semibold shadow-sm ${catalogueStatusClass(status)}`}>{status}</p>
       ) : null}
-
       <section className="rounded-lg border border-[#d8e7e3] bg-white p-3 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
           <label className="min-w-0 flex-1 text-xs font-bold text-[#4f6a72]">
@@ -3664,13 +4141,15 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
               <option value="missing-voltage">Missing voltage</option>
             </select>
           </label>
-          <button
-            type="button"
-            onClick={exportCatalogueCsv}
-            className="h-10 rounded-md border border-[#bddbd4] px-4 text-sm font-bold text-[#082c3a] transition hover:bg-[#f4faf8]"
-          >
-            Export CSV
-          </button>
+          {activeSection === "products" ? (
+            <button
+              type="button"
+              onClick={exportCatalogueCsv}
+              className="h-10 rounded-md border border-[#bddbd4] px-4 text-sm font-bold text-[#082c3a] transition hover:bg-[#f4faf8]"
+            >
+              Export CSV
+            </button>
+          ) : null}
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
           <span className="font-bold text-[#60777f]">Showing {filteredProductsForCatalogue.length} of {products.length} items</span>
@@ -3740,8 +4219,20 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                               <td className="space-y-2 p-3 text-[#082c3a]">
                                 <input value={editingForm.manufacturer} onChange={(event) => setEditingForm((current) => ({ ...current, manufacturer: event.target.value }))} className="h-9 w-full rounded-md border border-[#bddbd4] px-2 text-[#082c3a]" />
                                 <input value={editingForm.model} onChange={(event) => setEditingForm((current) => ({ ...current, model: event.target.value }))} className="h-9 w-full rounded-md border border-[#bddbd4] px-2 text-[#082c3a]" />
-                                {isInverter ? <input type="number" value={editingForm.surge_va} onChange={(event) => setEditingForm((current) => ({ ...current, surge_va: Number(event.target.value) }))} placeholder="Surge VA" className="h-9 w-full rounded-md border border-[#bddbd4] px-2 text-[#082c3a]" /> : null}
-                                {product.category === "hybrid-inverter" ? <input type="number" value={editingForm.hybrid_pv_current_a} onChange={(event) => setEditingForm((current) => ({ ...current, hybrid_pv_current_a: Number(event.target.value) }))} placeholder="Hybrid PV current A" className="h-9 w-full rounded-md border border-[#bddbd4] px-2 text-[#082c3a]" /> : null}
+                                {isInverter ? (
+                                  <label className="block text-[11px] font-bold text-[#4f6a72]">
+                                    {productFieldLabel(editingForm.category, "surge_va", "Surge / peak output (VA)")}
+                                    <input type="number" min={0} value={editingForm.surge_va} onChange={(event) => setEditingForm((current) => ({ ...current, surge_va: Number(event.target.value) }))} placeholder="e.g. 5000" title={productFieldHelp(editingForm.category, "surge_va")} aria-label={productFieldLabel(editingForm.category, "surge_va", "Surge / peak output (VA)")} className="mt-1 h-9 w-full rounded-md border border-[#bddbd4] px-2 text-[#082c3a] outline-none focus:border-[#117865]" />
+                                    <span className="mt-1 block text-[10px] font-semibold leading-4 text-[#60777f]">{productFieldHelp(editingForm.category, "surge_va")}</span>
+                                  </label>
+                                ) : null}
+                                {product.category === "hybrid-inverter" ? (
+                                  <label className="block text-[11px] font-bold text-[#4f6a72]" title={productFieldHelp(editingForm.category, "hybrid_pv_current_a")}>
+                                    {productFieldLabel(editingForm.category, "hybrid_pv_current_a", "Hybrid PV input current limit (A)")}
+                                    <input type="number" min={0} value={editingForm.hybrid_pv_current_a} onChange={(event) => setEditingForm((current) => ({ ...current, hybrid_pv_current_a: Number(event.target.value) }))} placeholder="e.g. 100" title={productFieldHelp(editingForm.category, "hybrid_pv_current_a")} aria-label={productFieldLabel(editingForm.category, "hybrid_pv_current_a", "Hybrid PV input current limit (A)")} className="mt-1 h-9 w-full rounded-md border border-[#bddbd4] px-2 text-[#082c3a] outline-none focus:border-[#117865]" />
+                                    <span className="mt-1 block text-[10px] font-semibold leading-4 text-[#60777f]">{productFieldHelp(editingForm.category, "hybrid_pv_current_a")}</span>
+                                  </label>
+                                ) : null}
                               </td>
                               <td className="p-3 text-[#082c3a]">
                                 {productFieldApplies(editingForm.category, "voltage") ? (
@@ -3755,11 +4246,11 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                                 <input value={editingForm.capacity_label} onChange={(event) => setEditingForm((current) => ({ ...current, capacity_label: event.target.value }))} className="h-9 w-40 rounded-md border border-[#bddbd4] px-2 text-[#082c3a]" />
                               </td>
                               <td className="p-3 text-[#082c3a]"><input type="number" value={editingForm.price} onChange={(event) => setEditingForm((current) => ({ ...current, price: Number(event.target.value) }))} className="h-9 w-32 rounded-md border border-[#bddbd4] px-2 text-[#082c3a]" /></td>
-                              <td className="p-3 text-[#117865]">{product.is_default ? "★" : ""}</td>
+                              <td className="p-3 text-[#117865]">{product.is_default ? "\u2605" : ""}</td>
                               <td className="p-3">
                                 <div className="flex gap-2">
-                                  <button type="button" onClick={() => updateProduct(product.id)} title="Save product" className="h-9 w-9 rounded-md bg-[#e8f4ff] font-bold text-[#0b5f8a]">✓</button>
-                                  <button type="button" onClick={() => setEditingId(null)} title="Cancel edit" className="h-9 w-9 rounded-md bg-[#f7e9e9] font-bold text-[#9b1c1c]">×</button>
+                                  <button type="button" onClick={() => updateProduct(product.id)} title="Save product" className="h-9 w-9 rounded-md bg-[#e8f4ff] font-bold text-[#0b5f8a]">{"\u2713"}</button>
+                                  <button type="button" onClick={() => setEditingId(null)} title="Cancel edit" className="h-9 w-9 rounded-md bg-[#f7e9e9] font-bold text-[#9b1c1c]">{"\u00d7"}</button>
                                 </div>
                               </td>
                             </>
@@ -3773,12 +4264,12 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
                               <td className="p-3 text-[#082c3a]">{voltageLabel(product)}</td>
                               <td className="p-3 text-[#082c3a]">{displayCapacity(product)}</td>
                               <td className="p-3 text-[#082c3a]">{rowPrice(product)}</td>
-                              <td className="p-3 text-[#117865]" title={product.is_default ? "Default product" : ""}>{product.is_default ? "★" : ""}</td>
+                              <td className="p-3 text-[#117865]" title={product.is_default ? "Default product" : ""}>{product.is_default ? "\u2605" : ""}</td>
                               <td className="p-3">
                                 <div className="flex gap-2">
-                                  <button type="button" onClick={() => makeDefault(product)} title="Make default" className="h-9 w-9 rounded-md bg-[#e8f4ff] font-bold text-[#0b5f8a]">★</button>
-                                  <button type="button" onClick={() => startEdit(product)} title="Edit product" className="h-9 w-9 rounded-md bg-[#eef7f4] font-bold text-[#082c3a]">✎</button>
-                                  <button type="button" onClick={() => deleteProduct(product.id)} title="Delete product" className="h-9 w-9 rounded-md bg-[#f7e9e9] font-bold text-[#9b1c1c]">×</button>
+                                  <button type="button" onClick={() => makeDefault(product)} title="Make default" className="h-9 w-9 rounded-md bg-[#e8f4ff] font-bold text-[#0b5f8a]">{"\u2605"}</button>
+                                  <button type="button" onClick={() => startEdit(product)} title="Edit product" className="h-9 w-9 rounded-md bg-[#eef7f4] font-bold text-[#082c3a]">{"\u270e"}</button>
+                                  <button type="button" onClick={() => deleteProduct(product.id)} title="Delete product" className="h-9 w-9 rounded-md bg-[#f7e9e9] font-bold text-[#9b1c1c]">{"\u00d7"}</button>
                                 </div>
                               </td>
                             </>
@@ -3802,3 +4293,33 @@ export default function SolarAdminApp({ activeSection = "dashboard", onSectionCh
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
