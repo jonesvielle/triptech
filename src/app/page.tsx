@@ -514,7 +514,7 @@ export default function Home() {
           >
             <div className="mx-auto max-w-7xl">
               <div
-                className={`inline-flex rounded-full border-2 px-5 py-2 text-primary-green`}
+                className={`mx-auto flex w-fit rounded-full border-2 px-5 py-2 text-primary-green md:mx-0`}
               >
                 OUR SERVICES
               </div>

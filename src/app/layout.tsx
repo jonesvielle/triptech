@@ -7,6 +7,11 @@ import PublicFooter from "./components/PublicFooter";
 export const metadata = {
   title: "TRI-P Tech Limited",
   description: "TRI-P Tech Limited develops and builds solar, security, and product design systems",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/images/logo/Logo C.png",
+  },
 };
 
 export default function RootLayout({

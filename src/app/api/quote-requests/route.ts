@@ -76,11 +76,23 @@ function requestType(payload: Record<string, unknown>) {
   const quote = payload.quote && typeof payload.quote === "object"
     ? payload.quote as Record<string, unknown>
     : {};
-  return String(quote.requestType || "solar").trim().toLowerCase();
+  return String(quote.requestType || payload.requestType || "solar").trim().toLowerCase();
 }
 
 function clientEmailHtml(payload: Record<string, unknown>) {
   const type = requestType(payload);
+
+  if (type === "contact" || type === "general") {
+    return `
+    <div style="font-family:Arial,sans-serif;color:#17323a;line-height:1.55;">
+      <h2 style="color:#082c3a;margin-bottom:4px;">TRI-P Tech message received</h2>
+      <p>Hello ${htmlEscape(payload.client_name || payload.clientName || "Client")},</p>
+      <p>Thank you for contacting TRI-P Tech Limited. Our team has received your message and will follow up with the right next step.</p>
+      <p style="margin-top:18px;color:#60777f;font-size:13px;">If this is urgent, you can still reach us through the phone or WhatsApp contact on our website.</p>
+    </div>
+  `;
+  }
+
   return `
     <div style="font-family:Arial,sans-serif;color:#17323a;line-height:1.55;">
       <h2 style="color:#082c3a;margin-bottom:4px;">TRI-P Tech ${type === "cctv" ? "CCTV" : "solar"} quote request received</h2>
@@ -99,6 +111,20 @@ function clientEmailHtml(payload: Record<string, unknown>) {
 
 function internalEmailHtml(payload: Record<string, unknown>) {
   const type = requestType(payload);
+
+  if (type === "contact" || type === "general") {
+    return `
+    <div style="font-family:Arial,sans-serif;color:#17323a;line-height:1.55;">
+      <h2 style="color:#082c3a;margin-bottom:4px;">New TRI-P Tech website enquiry</h2>
+      <p><strong>Client:</strong> ${htmlEscape(payload.client_name || payload.clientName || "Client")}</p>
+      <p><strong>Email:</strong> ${htmlEscape(payload.email || payload.client_email || payload.clientEmail || "Not provided")}</p>
+      <p><strong>Phone/WhatsApp:</strong> ${htmlEscape(payload.phone || "Not provided")}</p>
+      <p><strong>Source:</strong> ${htmlEscape(payload.location || "Contact page")}</p>
+      <p><strong>Message:</strong><br>${htmlEscape(payload.site_note || payload.siteNote || "Not provided")}</p>
+    </div>
+  `;
+  }
+
   return `
     <div style="font-family:Arial,sans-serif;color:#17323a;line-height:1.55;">
       <h2 style="color:#082c3a;margin-bottom:4px;">New ${type === "cctv" ? "CCTV" : "solar"} quote request</h2>
@@ -114,6 +140,8 @@ function internalEmailHtml(payload: Record<string, unknown>) {
 }
 
 async function sendQuoteEmails(payload: Record<string, unknown>) {
+  const type = requestType(payload);
+  const isContact = type === "contact" || type === "general";
   const clientEmail = String(payload.email || payload.client_email || payload.clientEmail || "").trim();
   const internalEmail = supportEmailAddress();
   const result = {
@@ -126,7 +154,9 @@ async function sendQuoteEmails(payload: Record<string, unknown>) {
     try {
       await sendMail({
         to: clientEmail,
-        subject: `TRI-P Tech ${requestType(payload) === "cctv" ? "CCTV" : "solar"} quote request received`,
+        subject: isContact
+          ? "TRI-P Tech message received"
+          : `TRI-P Tech ${type === "cctv" ? "CCTV" : "solar"} quote request received`,
         html: clientEmailHtml(payload),
       });
       result.clientSent = true;
@@ -139,7 +169,9 @@ async function sendQuoteEmails(payload: Record<string, unknown>) {
     try {
       await sendMail({
         to: internalEmail,
-        subject: `New TRI-P Tech ${requestType(payload) === "cctv" ? "CCTV" : "solar"} quote request`,
+        subject: isContact
+          ? "New TRI-P Tech website enquiry"
+          : `New TRI-P Tech ${type === "cctv" ? "CCTV" : "solar"} quote request`,
         html: internalEmailHtml(payload),
       });
       result.internalSent = true;

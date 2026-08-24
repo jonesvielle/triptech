@@ -171,8 +171,8 @@ const wizardLoad = (
   return {
     ...load,
     quantity,
-    dayHours,
-    nightHours,
+    dayHours: clampWholeWizardHours(dayHours),
+    nightHours: clampWholeWizardHours(nightHours),
     cyclePercent: cyclePercent ?? load.cyclePercent,
   };
 };
@@ -189,6 +189,10 @@ function grouped<T>(items: T[], key: (item: T) => string) {
 function clampNumber(value: unknown, min: number, max: number) {
   const numericValue = Number(value || 0);
   return Math.min(max, Math.max(min, numericValue));
+}
+
+function clampWholeWizardHours(value: unknown) {
+  return Math.round(clampNumber(value, 0, 12));
 }
 
 const applianceCategoryOrder = [
@@ -683,7 +687,7 @@ export default function SolarCalculatorApp({ mode = "wizard" }: { mode?: "wizard
         : [];
 
       if (transferredLoads.length) {
-        setLoads(transferredLoads.map((load) => ({ ...load, id: crypto.randomUUID() })));
+        setLoads(transferredLoads.map((load) => ({ ...load, id: crypto.randomUUID(), dayHours: clampWholeWizardHours(load.dayHours), nightHours: clampWholeWizardHours(load.nightHours) })));
       }
       if (transfer.assumptions) setAssumptions(transfer.assumptions);
       if (transfer.inverterType) setInverterType(transfer.inverterType);
@@ -805,8 +809,8 @@ export default function SolarCalculatorApp({ mode = "wizard" }: { mode?: "wizard
         wizardLoad(
           name,
           quantity,
-          clampNumber(dayHours * backup.dayScale, 0, 12),
-          clampNumber(nightHours * backup.nightScale, 0, 12),
+          clampWholeWizardHours(dayHours * backup.dayScale),
+          clampWholeWizardHours(nightHours * backup.nightScale),
           cycle
         )
       );
@@ -831,7 +835,12 @@ export default function SolarCalculatorApp({ mode = "wizard" }: { mode?: "wizard
 
   const applyWizardDraftLoads = () => {
     const selectedLoads = wizardDraftLoads.filter((load) => wizardSelectedLoadIds[load.id] && load.quantity > 0);
-    setLoads(selectedLoads.length ? selectedLoads : wizardDraftLoads);
+    const normalizedLoads = (selectedLoads.length ? selectedLoads : wizardDraftLoads).map((load) => ({
+      ...load,
+      dayHours: clampWholeWizardHours(load.dayHours),
+      nightHours: clampWholeWizardHours(load.nightHours),
+    }));
+    setLoads(normalizedLoads);
     setWizardStep(7);
   };
 
@@ -869,8 +878,8 @@ export default function SolarCalculatorApp({ mode = "wizard" }: { mode?: "wizard
           ...next,
           quantity: clampNumber(next.quantity, 0, 200),
           watts: clampNumber(next.watts, 0, 10000),
-          dayHours: clampNumber(next.dayHours, 0, 12),
-          nightHours: clampNumber(next.nightHours, 0, 12),
+          dayHours: clampWholeWizardHours(next.dayHours),
+          nightHours: clampWholeWizardHours(next.nightHours),
           cyclePercent: clampNumber(next.cyclePercent, 0, 100),
         };
       })
@@ -939,8 +948,8 @@ export default function SolarCalculatorApp({ mode = "wizard" }: { mode?: "wizard
             next.cyclePercent = defaultLoadCycle(appliance.name);
           }
         }
-        next.dayHours = clampNumber(next.dayHours, 0, 12);
-        next.nightHours = clampNumber(next.nightHours, 0, 12);
+        next.dayHours = clampWholeWizardHours(next.dayHours);
+        next.nightHours = clampWholeWizardHours(next.nightHours);
         next.cyclePercent = clampNumber(next.cyclePercent, 0, 100);
         return next;
       })
@@ -2577,4 +2586,5 @@ export default function SolarCalculatorApp({ mode = "wizard" }: { mode?: "wizard
     </div>
   );
 }
+
 
